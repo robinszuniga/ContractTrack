@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ContractTrack OPS v2.3</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#eef0f5;--white:#fff;--surface:#f5f6fa;--border:#dde1ec;--border2:#c4cadc;
+  --text:#1c2033;--text2:#5c6280;--text3:#9fa5bf;
+  --accent:#1a56db;--accent-bg:#eef3fd;--accent-border:#bfdbfe;
+  --green:#15803d;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+  --amber:#92400e;--amber-bg:#fffbeb;--amber-border:#fde68a;
+  --orange:#c2410c;--orange-bg:#fff7ed;--orange-border:#fed7aa;
+  --red:#b91c1c;--red-bg:#fef2f2;--red-border:#fecaca;
+  --purple:#6d28d9;--purple-bg:#f5f3ff;--purple-border:#ddd6fe;
+  --yellow:#854d0e;--yellow-bg:#fefce8;--yellow-border:#fef08a;
+  --sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --radius:10px;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.12);
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh}
+.layout{display:grid;grid-template-columns:220px 1fr;grid-template-rows:52px 1fr;min-height:100vh}
+.topbar{grid-column:1/-1;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.sidebar{background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.page{overflow-y:auto;padding:22px;display:none}
+.page.active{display:block}
+.logo{font-size:15px;font-weight:600;letter-spacing:-.3px}.logo b{color:var(--accent)}
+.logo-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-date{font-family:var(--mono);font-size:11px;color:var(--text3);background:var(--surface);border:1px solid var(--border);padding:4px 10px;border-radius:6px}
+.tb-user{display:flex;align-items:center;gap:7px;padding:4px 10px;border-radius:7px;background:var(--surface);border:1px solid var(--border)}
+.tb-uname{font-size:12px;font-weight:500}.tb-urole{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.bell-wrap{position:relative;cursor:pointer;padding:5px;border-radius:6px;color:var(--text2)}
+.bell-wrap:hover{background:var(--surface)}
+.bell-badge{position:absolute;top:-1px;right:-1px;min-width:16px;height:16px;background:var(--red);color:#fff;font-size:9px;font-family:var(--mono);border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--white)}
+.nav-sec{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:14px 16px 5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;color:var(--text2);font-size:12px;font-weight:500;transition:all .12s;border-left:2px solid transparent}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent);border-left-color:var(--accent)}
+.nav-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:1px 6px;border-radius:8px;color:#fff;min-width:18px;text-align:center}
+.nb-red{background:var(--red)}.nb-blue{background:var(--accent)}
+.sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.sidebar-footer p{font-family:var(--mono);font-size:9px;color:var(--text3);line-height:1.7}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surface)}
+.card-title{font-size:12px;font-weight:600;flex:1}
+.card-act{font-family:var(--mono);font-size:11px;color:var(--accent);cursor:pointer;background:none;border:none;padding:0}
+.card-act:hover{text-decoration:underline}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;font-family:var(--sans);cursor:pointer;border:none;transition:all .12s;line-height:1}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1648c0}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--surface)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.btn-sm{padding:5px 10px;font-size:11px}.btn-xs{padding:3px 8px;font-size:10px;border-radius:5px}
+.pill{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.p-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.p-orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-border)}
+.p-yellow{background:var(--yellow-bg);color:var(--yellow);border:1px solid var(--yellow-border)}
+.p-amber{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.p-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.p-blue{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border)}
+.p-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.p-gray{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-family:var(--mono);font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;font-weight:500}
+.req{color:var(--red)}
+.form-input{width:100%;background:var(--white);border:1px solid var(--border);border-radius:7px;padding:8px 11px;color:var(--text);font-family:var(--sans);font-size:12px;outline:none;transition:border-color .12s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.08)}
+.form-input::placeholder{color:var(--text3)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239fa5bf'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-textarea{resize:vertical;min-height:68px}
+.form-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;padding:8px 11px;border:1px solid var(--border);border-radius:7px;transition:border-color .12s}
+.form-check:hover{border-color:var(--accent);background:var(--accent-bg)}
+.form-check input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;margin-top:1px;flex-shrink:0}
+.form-check label{font-size:12px;color:var(--text);cursor:pointer;flex:1}
+.csub{font-size:10px;color:var(--text3);display:block;margin-top:2px;font-family:var(--mono)}
+.section-divider{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:10px 0 6px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:border-color .12s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.sc-red::before{background:var(--red)}.sc-orange::before{background:#ea580c}.sc-blue::before{background:var(--accent)}.sc-green::before{background:var(--green)}
+.stat-card:hover{border-color:var(--border2)}
+.stat-num{font-size:28px;font-weight:700;line-height:1;margin-bottom:3px}
+.sc-red .stat-num{color:var(--red)}.sc-orange .stat-num{color:#c2410c}.sc-blue .stat-num{color:var(--accent)}.sc-green .stat-num{color:var(--green)}
+.stat-label{font-size:11px;color:var(--text2)}.stat-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.alert-item:last-child{border-bottom:none}
+.alert-item:hover{background:var(--surface)}
+.al-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.d-red{background:var(--red)}.d-orange{background:#ea580c}.d-amber{background:#f59e0b}.d-green{background:var(--green)}
+.al-body{flex:1;min-width:0}
+.al-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.al-sub{font-size:11px;color:var(--text2);margin-bottom:3px}
+.al-action{font-family:var(--mono);font-size:10px;line-height:1.5}
+.al-tag{padding:2px 7px;border-radius:3px;font-size:9px;font-family:var(--mono);font-weight:700;flex-shrink:0;align-self:flex-start;margin-top:2px;white-space:nowrap}
+.t-red{background:var(--red-bg);color:var(--red)}.t-orange{background:var(--orange-bg);color:var(--orange)}.t-yellow{background:var(--yellow-bg);color:var(--yellow)}
+.proc-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.proc-item:last-child{border-bottom:none}
+.proc-item:hover{background:var(--surface)}
+.proc-id{font-family:var(--mono);font-size:10px;color:var(--text3);width:82px;flex-shrink:0}
+.proc-info{flex:1;min-width:0}
+.proc-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proc-meta{font-size:10px;color:var(--text2);font-family:var(--mono)}
+.wizard-steps{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);gap:0;background:var(--surface)}
+.wstep{display:flex;align-items:center;gap:7px}
+.wstep-line{flex:1;height:1px;background:var(--border);margin:0 6px}
+.wcirc{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--text3);flex-shrink:0;transition:all .2s;background:var(--white)}
+.wcirc.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.wcirc.done{border-color:var(--green);background:var(--green);color:#fff}
+.wlabel{font-size:11px;color:var(--text3);font-weight:500;white-space:nowrap}
+.wstep.active .wlabel{color:var(--text);font-weight:600}
+.wstep.done .wlabel{color:var(--green)}
+.wizard-body{padding:18px}
+.wizard-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--surface)}
+/* CRONOGRAMA */
+.crono-wrap{overflow-x:auto}
+.crono-table{width:100%;border-collapse:collapse}
+.crono-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);padding:7px 11px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface);white-space:nowrap}
+.crono-table td{padding:0;border-bottom:1px solid var(--border);vertical-align:middle}
+.crono-table tr:last-child td{border-bottom:none}
+.crono-table tr.fase-sep td{background:#f1f3f9;padding:5px 11px}
+.crono-table tr:not(.fase-sep):hover td{background:#fafbfe}
+.td-num{width:30px;padding:8px 5px 8px 11px;font-family:var(--mono);font-size:10px;color:var(--text3)}
+.td-name{padding:8px;min-width:190px}
+.td-name-main{font-size:12px;font-weight:500;color:var(--text)}
+.td-name-sub{font-size:10px;color:var(--text3);margin-top:1px;font-family:var(--mono)}
+.td-plazo{width:110px;padding:8px;font-family:var(--mono);font-size:10px;color:var(--text2);white-space:nowrap}
+.td-fecha{width:160px;padding:5px 8px}
+.td-tipo{width:110px;padding:8px}
+/* FECHA BTN */
+.fecha-btn{font-family:var(--mono);font-size:11px;font-weight:500;padding:4px 8px;border-radius:5px;border:1px solid transparent;cursor:pointer;background:transparent;color:var(--text);transition:all .12s;display:inline-block;white-space:nowrap}
+.fecha-btn:hover{border-color:var(--accent);background:var(--accent-bg)}
+.fecha-btn.auto{color:var(--green);background:var(--green-bg);border-color:var(--green-border)}
+.fecha-btn.auto-locked{color:var(--green);background:var(--green-bg);border-color:var(--green-border);cursor:default}
+.fecha-btn.auto-locked:hover{border-color:var(--green-border);background:var(--green-bg)}
+.fecha-btn.variable{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-border)}
+.fecha-btn.vacio{color:var(--text3);font-style:italic;background:var(--surface);border-color:var(--border)}
+.fecha-btn.vence-hoy{color:var(--red);background:var(--red-bg);border-color:var(--red-border)}
+.fecha-btn.vence-5{color:var(--orange);background:var(--orange-bg);border-color:var(--orange-border)}
+.fecha-btn.vence-15{color:var(--yellow);background:var(--yellow-bg);border-color:var(--yellow-border)}
+.fecha-lock-icon{font-size:10px;margin-left:3px;opacity:.6}
+.restore-btn{font-family:var(--mono);font-size:9px;color:var(--amber);cursor:pointer;margin-left:4px;opacity:.7}
+.restore-btn:hover{opacity:1}
+.fase-label{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2)}
+/* CALENDAR PICKER */
+.cal-overlay{position:fixed;inset:0;z-index:600;display:none}
+.cal-overlay.open{display:block}
+.cal-popup{position:absolute;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);width:280px;z-index:601;overflow:hidden}
+.cal-head{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+.cal-nav{background:none;border:none;cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:5px;font-size:14px;font-weight:600}
+.cal-nav:hover{background:var(--border)}
+.cal-month-label{flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--text)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:8px}
+.cal-dow{font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;padding:4px 0;font-weight:500}
+.cal-day{height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:none;background:transparent;transition:all .12s;font-family:var(--mono)}
+.cal-day:hover:not(:disabled){background:var(--accent-bg);color:var(--accent)}
+.cal-day.today{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.cal-day.selected{background:var(--accent);color:#fff;font-weight:600}
+.cal-day:disabled{color:var(--text3);cursor:not-allowed;opacity:.4}
+.cal-day.weekend{color:var(--red-border)}
+.cal-day:disabled.weekend{opacity:.3}
+.cal-festivo{color:var(--red)!important;font-style:italic}
+.cal-footer{padding:8px 14px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:6px;align-items:center;justify-content:space-between}
+.cal-legend{font-family:var(--mono);font-size:9px;color:var(--text3)}
+/* DETAIL */
+.detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:300}
+.detail-overlay.open{display:flex;align-items:flex-start;justify-content:flex-end}
+.det-panel{width:600px;height:100vh;background:var(--white);overflow-y:auto;box-shadow:-4px 0 24px rgba(0,0,0,.1);display:flex;flex-direction:column}
+.det-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px;background:var(--surface);position:sticky;top:0;z-index:10}
+.det-id{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.det-title{font-size:13px;font-weight:600;color:var(--text);margin-top:2px}
+.det-abogado{font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:2px}
+/* TABS - FIXED */
+.det-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 14px;gap:0;background:var(--white);overflow-x:auto;flex-shrink:0;position:sticky;top:0;z-index:9}
+.det-tab{padding:9px 11px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .12s;white-space:nowrap;flex-shrink:0;background:none;border-left:none;border-right:none;border-top:none}
+.det-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.det-tab:hover:not(.active){color:var(--text)}
+.det-pane{display:none;padding:16px;flex:1}
+.det-pane.active{display:block}
+/* FIELDS */
+.field-grid{border:1px solid var(--border);border-radius:8px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.f-row{padding:8px 13px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px}
+.f-row:nth-child(odd){border-right:1px solid var(--border)}
+.f-full{grid-column:1/-1;border-right:none!important}
+.f-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;width:88px;flex-shrink:0;padding-top:2px}
+.f-val{font-size:12px;color:var(--text);flex:1;cursor:pointer;padding:2px 5px;border-radius:4px;border:1px solid transparent;transition:all .12s;min-height:20px;word-break:break-word;line-height:1.5}
+.f-val:hover{background:var(--accent-bg);border-color:var(--border)}
+.f-val.editing{border-color:var(--accent)!important;background:var(--white)!important;outline:none}
+.f-val.hi-red{color:var(--red);font-weight:500}
+.f-val.hi-green{color:var(--green)}
+/* ESTADO SELECTOR */
+.estado-selector{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.estado-opt{padding:5px 12px;border-radius:6px;border:1.5px solid var(--border);font-size:11px;font-weight:500;cursor:pointer;transition:all .12s;font-family:var(--mono)}
+.estado-opt:hover{border-color:var(--accent)}
+.estado-opt.sel{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+/* HISTORIAL */
+.hist-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:4px}
+.hist-body{flex:1}
+.hist-action{font-size:12px;color:var(--text);line-height:1.4}
+.hist-action strong{color:var(--accent)}
+.hist-meta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px}
+.hist-note{font-size:11px;color:var(--text2);margin-top:5px;padding:6px 10px;background:var(--surface);border-radius:5px;border-left:2px solid var(--border2);line-height:1.5}
+/* OBS */
+.obs-card{border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;background:var(--surface)}
+.obs-card.urgente{border-color:var(--red-border);background:var(--red-bg)}
+.obs-card.riesgo{border-color:var(--orange-border);background:var(--orange-bg)}
+.obs-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.obs-text{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:6px}
+.obs-respuesta{font-size:11px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:5px;padding:8px 10px;margin-bottom:8px;line-height:1.5}
+.obs-respuesta-label{font-family:var(--mono);font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.obs-footer{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.countdown{font-family:var(--mono);font-size:11px;font-weight:600;margin-left:auto}
+.cd-red{color:var(--red)}.cd-orange{color:var(--orange)}.cd-green{color:var(--green)}
+/* DIAS HABILES COUNTER */
+.dias-counter{font-family:var(--mono);font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
+.dc-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.dc-warn{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-border)}
+.dc-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+/* CHECKLIST */
+.check-sec{margin-bottom:14px}
+.check-sec-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.check-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.check-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s}
+.check-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-box{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.check-box.checked{background:var(--green);border-color:var(--green)}
+.check-name{font-size:12px;color:var(--text);flex:1}
+.check-link{font-family:var(--mono);font-size:10px;color:var(--accent);cursor:pointer}
+/* LIQ */
+.liq-step{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);align-items:center}
+.liq-step:last-child{border-bottom:none}
+.liq-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1.5px solid var(--border2)}
+.liq-dot.done{background:var(--green);border-color:var(--green)}
+.liq-dot.pending{background:var(--white);border-color:var(--amber)}
+.liq-dot.urgent{background:var(--red);border-color:var(--red)}
+.liq-body{flex:1}
+.liq-name{font-size:12px;font-weight:500;color:var(--text)}
+.liq-meta{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+/* SUP */
+.sup-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px}
+.sup-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:12px;width:700px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;z-index:700;box-shadow:var(--shadow-md)}
+/* INFO BOX */
+.ib{border-radius:7px;padding:9px 13px;font-size:11px;line-height:1.6}
+.ib-blue{background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent)}
+.ib-amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+.ib-green{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+.ib-red{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+.search-input{flex:1;background:var(--white);border:1px solid var(--border);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--text);outline:none;font-family:var(--sans)}
+.search-input:focus{border-color:var(--accent)}
+/* MISC */
+.empty{text-align:center;padding:32px 16px;color:var(--text3)}
+.empty p{font-size:12px;margin-top:8px}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.page-title{font-size:16px;font-weight:700}.page-sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--mono)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* PDF PRINT */
+@media print{
+  body{background:#fff}
+  .layout{display:block}
+  .topbar,.sidebar,.det-head,.det-tabs,.btn{display:none!important}
+  .det-panel{width:100%;height:auto;box-shadow:none;position:static}
+  .det-pane{display:block!important;padding:12px 0}
+  #print-area{display:block}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo"><b>Contract</b>Track <span class="logo-sub">OPS v2.2</span></div>
+  <div class="tb-right">
+    <div class="tb-date" id="tb-fecha"></div>
+    <div class="bell-wrap" onclick="showPage('alertas')">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      <div class="bell-badge" id="bell-n">0</div>
+    </div>
+    <div class="tb-user"><div class="avatar">RZ</div><div><div class="tb-uname">Robinson Zuñiga</div><div class="tb-urole">Abogado OPS</div></div></div>
+  </div>
+</div>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="nav-sec">Principal</div>
+  <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>Dashboard
+  </div>
+  <div class="nav-item" id="nav-alertas" onclick="showPage('alertas')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9.33-5M13 21H7m4-14a1 1 0 11-2 0 1 1 0 012 0z"/></svg>Alertas
+    <span class="nav-badge nb-red" id="nav-n-alertas">0</span>
+  </div>
+  <div class="nav-item" id="nav-procesos" onclick="showPage('procesos')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Mis procesos
+    <span class="nav-badge nb-blue" id="nav-n-proc">0</span>
+  </div>
+  <div class="nav-sec">Registrar</div>
+  <div class="nav-item" onclick="openWizard()">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"/></svg>Nuevo proceso
+  </div>
+  <div class="nav-sec">Configuración</div>
+  <div class="nav-item" onclick="showPage('config')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+    Configuración
+  </div>
+  <div class="sidebar-footer"><p>Gobernación de La Guajira<br>Área de Contratación<br>Decreto 1082 de 2015<br>v2.3 — importador SECOP II</p></div>
+</div>
+<!-- PAGES -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div><div class="page-title" id="dash-greeting">Hola 👋</div><div class="page-sub" id="dash-sub"></div></div>
+    <button class="btn btn-primary" onclick="openWizard()"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>Nuevo proceso</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card sc-red" onclick="showPage('alertas')"><div class="stat-num" id="st-hoy">0</div><div class="stat-label">Acción legal hoy</div><div class="stat-sub">Vence hoy o ya venció</div></div>
+    <div class="stat-card sc-orange" onclick="showPage('alertas')"><div class="stat-num" id="st-5d">0</div><div class="stat-label">Plazo crítico</div><div class="stat-sub">1–5 días hábiles</div></div>
+    <div class="stat-card sc-blue" onclick="showPage('alertas')"><div class="stat-num" id="st-15d">0</div><div class="stat-label">Próximo a vencer</div><div class="stat-sub">6–15 días hábiles</div></div>
+    <div class="stat-card sc-green" onclick="showPage('procesos')"><div class="stat-num" id="st-aldia">0</div><div class="stat-label">Al día</div><div class="stat-sub">Sin urgencia</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card"><div class="card-head"><div class="card-title">⚡ Qué atender hoy</div><button class="card-act" onclick="showPage('alertas')">Ver todas →</button></div><div id="dash-alertas"></div></div>
+    <div class="card"><div class="card-head"><div class="card-title">Procesos recientes</div><button class="card-act" onclick="showPage('procesos')">Ver todos →</button></div><div id="dash-procesos"></div></div>
+  </div>
+</div>
+<div class="page" id="page-alertas">
+  <div class="page-header"><div><div class="page-title">Centro de alertas</div><div class="page-sub">Ordenadas por urgencia — días hábiles con festivos colombianos</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card"><div class="card-head" style="background:var(--red-bg);border-bottom-color:var(--red-border)"><div class="card-title" style="color:var(--red)">🔴 Acción legal hoy</div></div><div id="al-hoy"></div></div>
+    <div class="card"><div class="card-head" style="background:var(--orange-bg);border-bottom-color:var(--orange-border)"><div class="card-title" style="color:var(--orange)">🟠 Plazo crítico — 1 a 5 días hábiles</div></div><div id="al-5d"></div></div>
+    <div class="card"><div class="card-head" style="background:var(--yellow-bg);border-bottom-color:var(--yellow-border)"><div class="card-title" style="color:var(--yellow)">🟡 Próximo a vencer — 6 a 15 días hábiles</div></div><div id="al-15d"></div></div>
+    <div class="card"><div class="card-head"><div class="card-title" style="color:var(--green)">🟢 Al día</div></div><div id="al-aldia"></div></div>
+  </div>
+</div>
+<div class="page" id="page-procesos">
+  <div class="page-header"><div><div class="page-title">Mis procesos</div><div class="page-sub" id="proc-sub"></div></div><button class="btn btn-primary" onclick="openWizard()">+ Nuevo proceso</button></div>
+  <div class="card">
+    <div class="search-bar"><input class="search-input" id="proc-search" placeholder="Buscar proceso, contratista, objeto, abogado..." oninput="renderProcesos(this.value)"></div>
+    <div id="proc-list"></div>
+  </div>
+</div>
+<!-- PAGE: CONFIG -->
+<div class="page" id="page-config">
+  <div class="page-header"><div><div class="page-title">Configuración</div><div class="page-sub">Conexión con SECOP II · Apps Script Backend</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:16px;max-width:600px">
+    <div class="card">
+      <div class="card-head"><div class="card-title">🔗 URL del servidor Apps Script</div></div>
+      <div style="padding:16px">
+        <div class="ib ib-blue" style="margin-bottom:14px;font-size:11px;line-height:1.8">
+          Para importar datos automáticamente del SECOP II necesitas desplegar el Apps Script una sola vez.<br>
+          Descarga el archivo <strong>ContractTrack_AppsScript.gs</strong>, síguelas instrucciones incluidas y pega la URL aquí.
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL del Web App (Apps Script)</label>
+          <input class="form-input" id="cfg-server-url" placeholder="https://script.google.com/macros/s/XXXX/exec" oninput="guardarConfigServer()">
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="probarConexion()">🔌 Probar conexión</button>
+          <span id="cfg-status" style="font-family:var(--mono);font-size:11px;color:var(--text3)"></span>
+        </div>
+        <div class="ib ib-amber" style="margin-top:14px;font-size:11px;line-height:1.8">
+          <strong>Pasos para desplegar el Apps Script (5 minutos):</strong><br>
+          1. Abre <a href="https://script.google.com" target="_blank" style="color:var(--amber)">script.google.com</a> con tu cuenta Google<br>
+          2. Clic en "Nuevo proyecto" → pega el contenido del archivo .gs<br>
+          3. Guarda (Ctrl+S) → nombre: ContractTrack Backend<br>
+          4. Clic "Implementar" → "Nueva implementación" → Tipo: Aplicación web<br>
+          5. Ejecutar como: Yo · Acceso: Cualquier persona<br>
+          6. Clic "Implementar" → copia la URL → pégala arriba
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">ℹ️ Estado del sistema</div></div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
+          <span>Cálculo de días hábiles con festivos colombianos</span>
+          <span class="pill p-green" style="margin-left:auto">Activo</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
+          <span>Alertas automáticas (3 niveles)</span>
+          <span class="pill p-green" style="margin-left:auto">Activo</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px" id="cfg-server-status-row">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0" id="cfg-dot"></span>
+          <span>Importador SECOP II (Apps Script)</span>
+          <span class="pill p-gray" style="margin-left:auto" id="cfg-pill">Sin configurar</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:12px">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0"></span>
+          <span>Sincronización con Google Sheets</span>
+          <span class="pill p-gray" style="margin-left:auto">Próximamente</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- end layout -->
+
+<!-- MODAL WIZARD -->
+<div class="modal-overlay" id="modal-wizard">
+  <div class="modal">
+    <div class="card-head"><div class="card-title" style="font-size:14px">Registrar nuevo proceso</div><button class="btn btn-ghost btn-sm" onclick="closeWizard()" style="margin-left:auto">✕</button></div>
+    <div class="wizard-steps" id="wiz-steps"></div>
+    <div id="wiz-body"></div>
+    <div class="wizard-footer"><button class="btn btn-ghost btn-sm" id="btn-prev" onclick="wizPrev()" style="display:none">← Anterior</button><button class="btn btn-primary" id="btn-next" onclick="wizNext()">Siguiente →</button></div>
+  </div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="det-overlay">
+  <div class="det-panel">
+    <div class="det-head">
+      <div style="flex:1;min-width:0">
+        <div class="det-id" id="det-id-txt"></div>
+        <div class="det-title" id="det-title-txt"></div>
+        <div class="det-abogado" id="det-abogado-txt"></div>
+      </div>
+      <div id="det-estado-badge" style="flex-shrink:0;margin:0 8px"></div>
+      <a id="det-secop-btn" href="#" target="_blank" class="btn btn-ghost btn-sm">SECOP II ↗</a>
+      <button class="btn btn-ghost btn-sm" onclick="closeDet()">✕</button>
+    </div>
+    <!-- TABS FIXED — fuera del scroll -->
+    <div class="det-tabs" id="det-tabs-bar"></div>
+    <!-- PANES container — solo esto hace scroll -->
+    <div style="flex:1;overflow-y:auto">
+      <div class="det-pane active" id="dp-datos"></div>
+      <div class="det-pane" id="dp-crono"></div>
+      <div class="det-pane" id="dp-obs"></div>
+      <div class="det-pane" id="dp-liq"></div>
+      <div class="det-pane" id="dp-sup"></div>
+      <div class="det-pane" id="dp-docs"></div>
+      <div class="det-pane" id="dp-hist"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR PICKER -->
+<div class="cal-overlay" id="cal-overlay" onclick="closeCal(event)">
+  <div class="cal-popup" id="cal-popup">
+    <div class="cal-head">
+      <button class="cal-nav" onclick="calNav(-1)">‹</button>
+      <div class="cal-month-label" id="cal-label"></div>
+      <button class="cal-nav" onclick="calNav(1)">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-footer">
+      <span class="cal-legend">🔴 Festivo &nbsp;⬛ Fin de semana</span>
+      <button class="btn btn-ghost btn-xs" onclick="closeCal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// FECHAS Y DÍAS HÁBILES
+// ══════════════════════════════════════
+const HOY = new Date(2026,2,25);
+const FEST = new Set([
+  '2026-01-01','2026-01-12','2026-03-23','2026-04-02','2026-04-03',
+  '2026-05-01','2026-05-18','2026-06-08','2026-06-15','2026-07-20',
+  '2026-08-07','2026-08-17','2026-10-12','2026-11-02','2026-11-16',
+  '2026-12-08','2026-12-25','2027-01-01','2027-01-11','2027-04-01',
+  '2027-04-02','2027-05-01','2027-05-17','2027-05-24','2027-07-20',
+  '2027-08-07','2027-08-16','2027-10-18','2027-11-01','2027-11-15',
+  '2027-12-08','2027-12-25'
+]);
+const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MES3=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DIAS_SEM=['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+
+const fmt=d=>d?d.toISOString().split('T')[0]:'';
+const parse=s=>{if(!s)return null;const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const fmtD=d=>d?`${d.getDate()} ${MES3[d.getMonth()]} ${d.getFullYear()}`:'';
+function esFest(d){return FEST.has(fmt(d));}
+function esHabil(d){const w=d.getDay();return w!==0&&w!==6&&!esFest(d);}
+function addH(f,n){
+  if(!f)return null;
+  let d=new Date(f),c=0;
+  const dir=n<0?-1:1,abs=Math.abs(n);
+  while(c<abs){d.setDate(d.getDate()+dir);if(esHabil(d))c++;}
+  return d;
+}
+function diasH(a,b){
+  if(!a||!b)return null;
+  let d=new Date(typeof a==='string'?parse(a):a),c=0;
+  const fin=typeof b==='string'?parse(b):b;
+  if(!fin||d>fin)return null;
+  while(d<=fin){if(esHabil(d))c++;d.setDate(d.getDate()+1);}
+  return c;
+}
+function diasRest(f){
+  if(!f)return null;
+  const d=typeof f==='string'?parse(f):f;
+  if(!d)return null;
+  const h=new Date(HOY);h.setHours(0,0,0,0);
+  const fd=new Date(d);fd.setHours(0,0,0,0);
+  if(fd<h){
+    let c=0,x=new Date(fd);
+    while(x<h){x.setDate(x.getDate()+1);if(esHabil(x))c++;}
+    return -c;
+  }
+  return diasH(h,fd);
+}
+
+// ══════════════════════════════════════
+// CALENDAR PICKER CUSTOM
+// ══════════════════════════════════════
+let calCb=null,calYear=HOY.getFullYear(),calMonth=HOY.getMonth(),calMinDate=null;
+
+function openCal(cb,anchorEl,minDateStr){
+  calCb=cb;
+  calMinDate=minDateStr?parse(minDateStr):null;
+  calYear=HOY.getFullYear();calMonth=HOY.getMonth();
+  renderCal();
+  const pop=document.getElementById('cal-popup');
+  const rect=anchorEl.getBoundingClientRect();
+  pop.style.top=(rect.bottom+4)+'px';
+  pop.style.left=Math.min(rect.left,window.innerWidth-290)+'px';
+  document.getElementById('cal-overlay').classList.add('open');
+}
+function closeCal(e){
+  if(e&&e.target!==document.getElementById('cal-overlay'))return;
+  document.getElementById('cal-overlay').classList.remove('open');
+  calCb=null;
+}
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}else if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function renderCal(){
+  document.getElementById('cal-label').textContent=`${MES[calMonth]} ${calYear}`;
+  const grid=document.getElementById('cal-grid');
+  let html=DIAS_SEM.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1);
+  const startDow=first.getDay();
+  for(let i=0;i<startDow;i++) html+=`<div></div>`;
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  for(let d=1;d<=days;d++){
+    const date=new Date(calYear,calMonth,d);
+    const ds=fmt(date);
+    const isFest=esFest(date);
+    const isWe=date.getDay()===0||date.getDay()===6;
+    const isToday=ds===fmt(HOY);
+    const disabled=isWe||isFest||(calMinDate&&date<calMinDate);
+    const cls=['cal-day',isToday?'today':'',isFest?'cal-festivo':isWe?'weekend':''].filter(Boolean).join(' ');
+    html+=`<button class="${cls}" ${disabled?'disabled':''} onclick="selCalDay('${ds}')" title="${isFest?'Festivo':isWe?'Fin de semana':''}">${d}</button>`;
+  }
+  grid.innerHTML=html;
+}
+function selCalDay(ds){
+  document.getElementById('cal-overlay').classList.remove('open');
+  if(calCb) calCb(ds);
+  calCb=null;
+}
+
+// ══════════════════════════════════════
+// CRONOGRAMAS
+// ══════════════════════════════════════
+const CR={
+  lp:{n:'Licitación pública',estados:['Publicado','Proyecto de pliego','Apertura','En evaluación','Adjudicado','En ejecución','Vencido','Liquidado'],e:[
+    {f:'Fase 1 — Proyecto de pliegos'},
+    {id:'pub',n:'Publicación aviso y proyecto de pliego',s:'Estudios previos simultáneos',t:'fijo',b:null,h:0,p:'Día 0'},
+    {id:'obs_pp',n:'Vencimiento obs. proyecto de pliego',s:'',t:'auto',b:'pub',h:10,p:'+10d h. (fijo)',obs:true},
+    {id:'resp_pp',n:'Respuesta obs. proyecto de pliego',s:'Antes del pliego definitivo',t:'var',b:'obs_pp',h:3,p:'~+3d h.'},
+    {id:'mipymes',n:'Manifestación limitación MIPYMES',s:'Condicional',t:'cond',b:'apertura',h:-1,p:'1d h. antes apertura',cond:'mipymes'},
+    {f:'Fase 2 — Presentación de propuestas'},
+    {id:'apertura',n:'Acto de apertura · Pliego definitivo',s:'',t:'var',b:'resp_pp',h:2,p:'~+2d h.'},
+    {id:'riesgos',n:'Audiencia asignación de riesgos',s:'Obligatoria',t:'auto',b:'apertura',h:3,p:'+3d h. (fijo)'},
+    {id:'obs_pd',n:'Vencimiento obs. pliego definitivo',s:'',t:'var',b:'apertura',h:3,p:'~+3d h.',obs:true},
+    {id:'resp_pd',n:'Respuesta obs. pliego definitivo',s:'',t:'var',b:'obs_pd',h:2,p:'~+2d h.'},
+    {id:'adendas',n:'Plazo límite adendas',s:'',t:'auto',b:'cierre',h:-3,p:'-3d h. antes cierre'},
+    {id:'cierre',n:'Cierre · Presentación y apertura ofertas',s:'',t:'var',b:'resp_pd',h:5,p:'~+5d h.'},
+    {f:'Fase 3 — Evaluación'},
+    {id:'informe',n:'Publicación informe de evaluación',s:'',t:'var',b:'cierre',h:10,p:'~+10d h.'},
+    {id:'traslado',n:'Vencimiento traslado informe evaluación',s:'',t:'auto',b:'informe',h:5,p:'+5d h. (fijo)',obs:true},
+    {id:'resp_eval',n:'Respuesta obs. evaluación',s:'',t:'var',b:'traslado',h:2,p:'~+2d h.'},
+    {f:'Fase 4 — Adjudicación y contrato'},
+    {id:'adjudicacion',n:'Audiencia de adjudicación',s:'En audiencia pública',t:'var',b:'resp_eval',h:1,p:'~+1d h.'},
+    {id:'firma',n:'Firma del contrato',s:'',t:'var',b:'adjudicacion',h:2,p:'~+2d h.'},
+    {id:'ejecucion',n:'Inicio ejecución',s:'',t:'var',b:'firma',h:1,p:'Según contrato'},
+    {id:'vencimiento',n:'Vencimiento del contrato',s:'⚠ Alerta 15d y 5d antes',t:'var',b:'ejecucion',h:60,p:'Según contrato',alertar:true},
+  ]},
+  op:{n:'Licitación obra pública',estados:['Publicado','Proyecto de pliego','Apertura','En evaluación','Adjudicado','En ejecución','Vencido','Liquidado'],e:[
+    {f:'Fase 1 — Proyecto de pliegos'},
+    {id:'pub',n:'Publicación aviso y proyecto de pliego',s:'Docs Tipo CCE · Capacidad Residual K',t:'fijo',b:null,h:0,p:'Día 0'},
+    {id:'obs_pp',n:'Vencimiento obs. proyecto de pliego',s:'',t:'auto',b:'pub',h:10,p:'+10d h. (fijo)',obs:true},
+    {id:'resp_pp',n:'Respuesta obs.',s:'',t:'var',b:'obs_pp',h:3,p:'~+3d h.'},
+    {id:'visita',n:'Visita al sitio de la obra',s:'Condicional',t:'cond',b:'resp_pp',h:2,p:'~+2d h.',cond:'visita'},
+    {id:'mipymes',n:'Manifestación limitación MIPYMES',s:'Condicional',t:'cond',b:'apertura',h:-1,p:'1d h. antes apertura',cond:'mipymes'},
+    {f:'Fase 2 — Propuestas doble sobre'},
+    {id:'apertura',n:'Acto de apertura · Pliego definitivo',s:'Sobre 1 técnico · Sobre 2 económico cerrado',t:'var',b:'resp_pp',h:2,p:'~+2d h.'},
+    {id:'riesgos',n:'Audiencia asignación de riesgos',s:'',t:'auto',b:'apertura',h:3,p:'+3d h. (fijo)'},
+    {id:'obs_pd',n:'Vencimiento obs. pliego definitivo',s:'',t:'var',b:'apertura',h:3,p:'~+3d h.',obs:true},
+    {id:'resp_pd',n:'Respuesta obs. pliego',s:'',t:'var',b:'obs_pd',h:2,p:'~+2d h.'},
+    {id:'adendas',n:'Plazo límite adendas',s:'',t:'auto',b:'cierre',h:-3,p:'-3d h. antes cierre'},
+    {id:'cierre',n:'Cierre · Sobre 1',s:'Sobre 2 permanece cerrado',t:'var',b:'resp_pd',h:5,p:'~+5d h.'},
+    {f:'Fase 3 — Evaluación técnica'},
+    {id:'eval_tec',n:'Evaluación técnica habilitante',s:'',t:'var',b:'cierre',h:10,p:'~+10d h.'},
+    {id:'informe',n:'Publicación informe evaluación técnica',s:'',t:'var',b:'eval_tec',h:3,p:'~+3d h.'},
+    {id:'traslado',n:'Vencimiento traslado informe',s:'',t:'auto',b:'informe',h:5,p:'+5d h. (fijo)',obs:true},
+    {f:'Fase 4 — Audiencia efectiva'},
+    {id:'adjudicacion',n:'Audiencia efectiva · Se abre Sobre 2',s:'',t:'var',b:'traslado',h:2,p:'~+2d h.'},
+    {id:'firma',n:'Firma del contrato',s:'',t:'var',b:'adjudicacion',h:3,p:'~+3d h.'},
+    {id:'ejecucion',n:'Inicio ejecución',s:'',t:'var',b:'firma',h:1,p:'Según contrato'},
+    {id:'vencimiento',n:'Vencimiento del contrato',s:'⚠ Alerta 15d y 5d antes',t:'var',b:'ejecucion',h:120,p:'Según contrato',alertar:true},
+  ]},
+  cm:{n:'Concurso de méritos',estados:['Publicado','Proyecto de pliego','Apertura','En evaluación','Adjudicado','En ejecución','Vencido','Liquidado'],e:[
+    {f:'Fase 1 — Proyecto de pliegos'},
+    {id:'pub',n:'Publicación aviso y proyecto de pliego',s:'',t:'fijo',b:null,h:0,p:'Día 0'},
+    {id:'obs_pp',n:'Vencimiento obs. proyecto de pliego',s:'',t:'auto',b:'pub',h:5,p:'+5d h. (fijo)',obs:true},
+    {id:'resp_pp',n:'Respuesta obs.',s:'',t:'var',b:'obs_pp',h:2,p:'~+2d h.'},
+    {f:'Fase 2 — Presentación'},
+    {id:'apertura',n:'Acto de apertura · Pliego definitivo',s:'',t:'var',b:'resp_pp',h:2,p:'~+2d h.'},
+    {id:'obs_pd',n:'Vencimiento obs. pliego definitivo',s:'',t:'var',b:'apertura',h:3,p:'~+3d h.',obs:true},
+    {id:'resp_pd',n:'Respuesta obs. pliego',s:'',t:'var',b:'obs_pd',h:2,p:'~+2d h.'},
+    {id:'adendas',n:'Plazo límite adendas',s:'',t:'auto',b:'cierre',h:-1,p:'-1d h. antes cierre'},
+    {id:'cierre',n:'Cierre',s:'',t:'var',b:'resp_pd',h:5,p:'~+5d h.'},
+    {f:'Fase 3 — Evaluación'},
+    {id:'eval',n:'Evaluación e informe preliminar',s:'',t:'var',b:'cierre',h:8,p:'~+8d h.'},
+    {id:'traslado',n:'Vencimiento traslado informe',s:'',t:'auto',b:'eval',h:3,p:'+3d h. (fijo)',obs:true},
+    {id:'informe_def',n:'Informe definitivo',s:'',t:'var',b:'traslado',h:2,p:'~+2d h.'},
+    {f:'Fase 4 — Adjudicación'},
+    {id:'adjudicacion',n:'Acto de adjudicación',s:'',t:'var',b:'informe_def',h:1,p:'~+1d h.'},
+    {id:'aceptacion',n:'Aceptación de oferta',s:'Exclusivo concurso de méritos',t:'auto',b:'adjudicacion',h:3,p:'+3d h. (fijo)'},
+    {id:'firma',n:'Firma del contrato',s:'',t:'var',b:'aceptacion',h:2,p:'~+2d h.'},
+    {id:'ejecucion',n:'Inicio ejecución',s:'',t:'var',b:'firma',h:1,p:'Según contrato'},
+    {id:'vencimiento',n:'Vencimiento del contrato',s:'⚠ Alerta 15d y 5d antes',t:'var',b:'ejecucion',h:60,p:'Según contrato',alertar:true},
+  ]},
+  sa:{n:'Sel. abreviada menor cuantía',estados:['Publicado','Proyecto de pliego','Apertura','En evaluación','Adjudicado','En ejecución','Vencido','Liquidado'],e:[
+    {f:'Fase 1 — Proyecto de pliegos'},
+    {id:'pub',n:'Publicación aviso y proyecto de pliego',s:'',t:'fijo',b:null,h:0,p:'Día 0'},
+    {id:'obs_pp',n:'Vencimiento obs. proyecto de pliego',s:'',t:'auto',b:'pub',h:5,p:'+5d h. (fijo)',obs:true},
+    {id:'resp_pp',n:'Respuesta obs.',s:'',t:'var',b:'obs_pp',h:2,p:'~+2d h.'},
+    {id:'mipymes',n:'Manifestación limitación MIPYMES',s:'Condicional',t:'cond',b:'apertura',h:-1,p:'1d h. antes apertura',cond:'mipymes'},
+    {f:'Fase 2 — Manifestación de interés'},
+    {id:'apertura',n:'Acto de apertura · Pliego definitivo',s:'',t:'var',b:'resp_pp',h:2,p:'~+2d h.'},
+    {id:'manifestacion',n:'Vencimiento manifestación de interés',s:'',t:'auto',b:'apertura',h:3,p:'+3d h. (fijo)'},
+    {id:'sorteo',n:'Sorteo e informe de consolidación',s:'Condicional — si hay más de 10',t:'cond',b:'manifestacion',h:1,p:'~+1d h.',cond:'sorteo'},
+    {id:'obs_pd',n:'Vencimiento obs. pliego definitivo',s:'',t:'var',b:'apertura',h:3,p:'~+3d h.',obs:true},
+    {id:'resp_pd',n:'Respuesta obs. pliego',s:'',t:'var',b:'obs_pd',h:2,p:'~+2d h.'},
+    {id:'adendas',n:'Plazo límite adendas',s:'',t:'auto',b:'cierre',h:-1,p:'-1d h. antes cierre'},
+    {id:'cierre',n:'Cierre',s:'',t:'var',b:'resp_pd',h:5,p:'~+5d h.'},
+    {f:'Fase 3 — Evaluación'},
+    {id:'eval',n:'Evaluación e informe',s:'',t:'var',b:'cierre',h:6,p:'~+6d h.'},
+    {id:'traslado',n:'Vencimiento traslado informe',s:'',t:'auto',b:'eval',h:3,p:'+3d h. (fijo)',obs:true},
+    {f:'Fase 4 — Adjudicación'},
+    {id:'adjudicacion',n:'Acto de adjudicación',s:'',t:'var',b:'traslado',h:1,p:'~+1d h.'},
+    {id:'firma',n:'Firma del contrato',s:'',t:'var',b:'adjudicacion',h:2,p:'~+2d h.'},
+    {id:'ejecucion',n:'Inicio ejecución',s:'',t:'var',b:'firma',h:1,p:'Según contrato'},
+    {id:'vencimiento',n:'Vencimiento del contrato',s:'⚠ Alerta 15d y 5d antes',t:'var',b:'ejecucion',h:30,p:'Según contrato',alertar:true},
+  ]},
+  mc:{n:'Mínima cuantía',estados:['Publicado','En evaluación','Adjudicado','En ejecución','Vencido','Liquidado'],e:[
+    {f:'Fase 1 — Observaciones'},
+    {id:'pub',n:'Publicación invitación a participar',s:'',t:'fijo',b:null,h:0,p:'Día 0'},
+    {id:'mipymes',n:'Solicitudes limitación MIPYMES',s:'Condicional',t:'cond',b:'pub',h:0,p:'Simultáneo',cond:'mipymes'},
+    {id:'obs_inv',n:'Vencimiento obs. a la invitación',s:'',t:'auto',b:'pub',h:1,p:'+1d h. (fijo)',obs:true},
+    {id:'resp_inv',n:'Respuesta obs. invitación',s:'',t:'var',b:'obs_inv',h:1,p:'~+1d h.'},
+    {f:'Fase 2 — Propuestas'},
+    {id:'adendas',n:'Plazo límite adendas',s:'',t:'auto',b:'cierre',h:-1,p:'-1d h. antes cierre'},
+    {id:'cierre',n:'Cierre',s:'',t:'var',b:'resp_inv',h:3,p:'~+3d h.'},
+    {f:'Fase 3 — Evaluación'},
+    {id:'eval',n:'Informe de evaluación',s:'',t:'var',b:'cierre',h:3,p:'~+3d h.'},
+    {id:'revision',n:'Revisión requisitos habilitantes',s:'',t:'var',b:'eval',h:2,p:'~+2d h.'},
+    {id:'subsanar',n:'Oportunidad para subsanar',s:'',t:'var',b:'revision',h:1,p:'~+1d h.'},
+    {id:'traslado',n:'Vencimiento traslado informe',s:'',t:'auto',b:'subsanar',h:1,p:'+1d h. (fijo)',obs:true},
+    {id:'aceptacion',n:'Respuesta obs. y aceptación de oferta',s:'No hay audiencia formal',t:'var',b:'traslado',h:1,p:'~+1d h.'},
+    {id:'firma',n:'Firma del contrato',s:'',t:'var',b:'aceptacion',h:1,p:'~+1d h.'},
+    {id:'ejecucion',n:'Inicio ejecución',s:'',t:'var',b:'firma',h:1,p:'Según contrato'},
+    {id:'vencimiento',n:'Vencimiento del contrato',s:'⚠ Alerta 15d y 5d antes',t:'var',b:'ejecucion',h:20,p:'Según contrato',alertar:true},
+  ]},
+  cd:{n:'Contratación directa',estados:['En trámite','Firmado','En ejecución','Vencido','Liquidado'],e:[
+    {f:'Fase única — Trámite interno'},
+    {id:'pub',n:'Publicación estudios previos',s:'Justificación causal',t:'fijo',b:null,h:0,p:'Día 0'},
+    {id:'estudio',n:'Estudio de mercado',s:'',t:'var',b:'pub',h:3,p:'~+3d h.'},
+    {id:'minuta',n:'Elaboración de minuta',s:'',t:'var',b:'estudio',h:3,p:'~+3d h.'},
+    {id:'firma',n:'Firma del contrato',s:'',t:'var',b:'minuta',h:2,p:'~+2d h.'},
+    {id:'ejecucion',n:'Inicio ejecución',s:'',t:'var',b:'firma',h:1,p:'Según contrato'},
+    {id:'vencimiento',n:'Vencimiento del contrato',s:'⚠ Alerta 15d y 5d antes',t:'var',b:'ejecucion',h:30,p:'Según contrato',alertar:true},
+  ]}
+};
+
+const DOCS_TIPO={
+  lp:[{sec:'Precontractual',items:['Estudios previos y análisis de conveniencia','Estudio del sector','Proyecto de pliego de condiciones','Respuesta obs. proyecto pliego','Pliego definitivo en SECOP II','Respuesta obs. pliego definitivo','Acta audiencia asignación de riesgos','Informe evaluación de ofertas','Respuesta obs. informe evaluación']},{sec:'Contractual',items:['Acta de adjudicación','Contrato firmado','Garantías de cumplimiento','Registro presupuestal (RP)','Acta de inicio','Informes de supervisión','Acta de liquidación','Paz y salvo del contratista']}],
+  op:[{sec:'Precontractual',items:['Estudios previos','Estudio del sector','Verificación Capacidad Residual K','Proyecto de pliego (Docs Tipo CCE)','Respuesta obs. proyecto pliego','Pliego definitivo','Acta visita al sitio','Respuesta obs. pliego definitivo','Evaluación técnica (Sobre 1)','Respuesta obs. evaluación']},{sec:'Contractual',items:['Acta audiencia efectiva de adjudicación','Contrato firmado','Garantías de cumplimiento y calidad','Acta de inicio','Informes de supervisión','Acta recibo parcial','Acta recibo final','Acta de liquidación']}],
+  cm:[{sec:'Precontractual',items:['Estudios previos','Proyecto de pliego','Respuesta obs.','Pliego definitivo','Respuesta obs. pliego','Informe evaluación','Traslado informe','Informe definitivo']},{sec:'Contractual',items:['Acto de adjudicación','Aceptación de oferta','Contrato firmado','Garantías','Acta de inicio','Informes supervisión','Acta liquidación']}],
+  sa:[{sec:'Precontractual',items:['Estudios previos','Proyecto de pliego','Respuesta obs.','Pliego definitivo','Acta manifestación de interés','Acta sorteo (si aplica)','Informe evaluación','Respuesta obs. evaluación']},{sec:'Contractual',items:['Acto de adjudicación','Contrato firmado','Garantías','Acta de inicio','Informes supervisión','Acta liquidación']}],
+  mc:[{sec:'Precontractual',items:['Invitación publicada','Respuesta obs. invitación','Informe de evaluación','Revisión requisitos','Traslado informe','Aceptación de oferta']},{sec:'Contractual',items:['Contrato firmado','Garantías','Acta de inicio','Informes supervisión','Acta liquidación']}],
+  cd:[{sec:'Precontractual',items:['Estudios previos y justificación','Estudio de mercado','Minuta del contrato']},{sec:'Contractual',items:['Contrato firmado','Garantías','Acta de inicio','Informes supervisión','Acta liquidación']}]
+};
+
+const LIQ_ETAPAS=[
+  {id:'sol_liq',n:'Solicitud de liquidación al supervisor',p:'Al vencer el contrato'},
+  {id:'informe_sup',n:'Informe final del supervisor',p:'Requerido para tramitar liquidación'},
+  {id:'paz_salvo',n:'Paz y salvo del contratista',p:''},
+  {id:'borrador_acta',n:'Elaboración borrador acta de liquidación',p:''},
+  {id:'firma_bilateral',n:'Firma acta liquidación bilateral',p:'Plazo: 4 meses desde vencimiento'},
+  {id:'publ_secop',n:'Publicación acta en SECOP II',p:''},
+  {id:'archivo',n:'Cierre del expediente contractual',p:''},
+];
+
+// ══════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════
+let PROCESOS=[
+  {id:'LP-001-2026',tipo:'lp',objeto:'Construcción y adecuación vías terciarias municipio de Riohacha',
+   contratista:'Construimos SAS',nit:'900.123.456-1',valor:'$480.000.000',numContrato:'045-2026',
+   cdp:'2026-0234',crp:'2026-0156',rubro:'2.3.1 Infraestructura vial',
+   supervisor:'J. Martínez',abogado:'Robinson Zuñiga',dependencia:'Infraestructura',
+   linkSecop:'https://www.secop.gov.co',linkDrive:'',
+   nota:'Contratista confirmó entrega parcial el 20 mar. Pendiente acta de recibo.',
+   estado:'En ejecución',fechaBase:'2026-01-15',
+   editadas:{firma:'2026-02-16',ejecucion:'2026-02-20',vencimiento:'2026-03-27'},
+   condiciones:{},
+   observaciones:[
+     {tipo:'pliego_def',texto:'Constructora Alfa: el pliego no especifica sistema de ponderación para el factor experiencia.',recibida:'2026-02-10',vence:'2026-02-15',respondida:true,respuestaFecha:'2026-02-13',respuestaTxt:'La ponderación está establecida en la sección 4.2 del pliego, conforme al art. 2.2.1.1.2.2.1 del Decreto 1082 de 2015.',fundamento:'Art. 2.2.1.1.2.2.1 Decreto 1082/2015'},
+     {tipo:'eval',texto:'Ingeniería Sur: solicita recalificación del puntaje técnico en ítem de maquinaria propia.',recibida:'2026-03-20',vence:'2026-03-25',respondida:false,respuestaTxt:'',fundamento:''},
+   ],
+   liq:{etapas:{sol_liq:true,informe_sup:true,paz_salvo:false,borrador_acta:false,firma_bilateral:false,publ_secop:false,archivo:false}},
+   supervision:[{periodo:'Feb 2026',fecha:'2026-02-28',estado:'recibido',observacion:'Avance del 30% de las obras.'},{periodo:'Mar 2026',fecha:'2026-03-20',estado:'recibido',observacion:'Entrega parcial sector norte. Pendiente sector sur.'}],
+   docs:{lp:DOCS_TIPO.lp.map(s=>({sec:s.sec,items:s.items.map((n,i)=>({n,ok:i<6,link:''}))}))} ,
+   historial:[{a:'Estado cambiado a <strong>En ejecución</strong>',q:'Robinson Zuñiga',f:'15 feb 2026 · 9:32am',n:''},{a:'Número de contrato registrado: <strong>045-2026</strong>',q:'Robinson Zuñiga',f:'16 feb 2026 · 10:00am',n:''},{a:'Proceso creado',q:'Robinson Zuñiga',f:'15 ene 2026 · 8:20am',n:''}]
+  },
+  {id:'LP-005-2026',tipo:'op',objeto:'Construcción placa huella vereda El Palmar',
+   contratista:'Constructora Norte SAS',nit:'900.765.432-1',valor:'$1.200.000.000',numContrato:'',
+   cdp:'2026-0198',crp:'',rubro:'2.3.1 Infraestructura vial rural',
+   supervisor:'R. Zuñiga',abogado:'María Pérez',dependencia:'Infraestructura',
+   linkSecop:'https://www.secop.gov.co',linkDrive:'',
+   nota:'Observaciones activas al pliego definitivo.',
+   estado:'Observaciones activas',fechaBase:'2026-02-01',
+   editadas:{obs_pd:'2026-03-25'},condiciones:{visita:true},
+   observaciones:[{tipo:'pliego_def',texto:'Vías del Sur: solicita aclaración sobre el peso específico del afirmado en la sección 3.2.',recibida:'2026-03-20',vence:'2026-03-25',respondida:false,respuestaTxt:'',fundamento:''}],
+   liq:{etapas:{}},supervision:[],
+   docs:{op:DOCS_TIPO.op.map(s=>({sec:s.sec,items:s.items.map(n=>({n,ok:false,link:''}))}))} ,
+   historial:[{a:'Proceso creado',q:'María Pérez',f:'01 feb 2026 · 8:00am',n:''}]
+  },
+  {id:'CD-014-2026',tipo:'cd',objeto:'Suministro equipos de cómputo para dependencias',
+   contratista:'Tech&Gov Ltda',nit:'800.456.789-2',valor:'$85.000.000',numContrato:'046-2026',
+   cdp:'2026-0312',crp:'2026-0210',rubro:'2.1.4 Equipos de oficina',
+   supervisor:'C. Pérez',abogado:'Carlos Jiménez',dependencia:'Sistemas',
+   linkSecop:'https://www.secop.gov.co',linkDrive:'',nota:'Publicar acta de adjudicación en SECOP hoy.',
+   estado:'Adjudicado',fechaBase:'2026-03-10',
+   editadas:{adjudicacion:'2026-03-20',firma:'2026-03-24',vencimiento:'2026-06-24'},condiciones:{},
+   observaciones:[],liq:{etapas:{}},supervision:[],
+   docs:{cd:DOCS_TIPO.cd.map(s=>({sec:s.sec,items:s.items.map((n,i)=>({n,ok:i<2,link:''}))}))} ,
+   historial:[{a:'Proceso adjudicado · Contrato 046-2026',q:'Carlos Jiménez',f:'20 mar 2026 · 2:00pm',n:''},{a:'Proceso creado',q:'Carlos Jiménez',f:'10 mar 2026 · 9:00am',n:''}]
+  },
+  {id:'MC-007-2026',tipo:'mc',objeto:'Compra de papelería y útiles de oficina',
+   contratista:'Oficina & Más',nit:'123.456.789-0',valor:'$12.500.000',numContrato:'',
+   cdp:'2026-0289',crp:'',rubro:'2.1.1 Materiales de oficina',
+   supervisor:'A. López',abogado:'Robinson Zuñiga',dependencia:'Administrativa',
+   linkSecop:'https://www.secop.gov.co',linkDrive:'',nota:'En evaluación. Plazo informe vence en 2 días.',
+   estado:'En evaluación',fechaBase:'2026-03-18',editadas:{},condiciones:{},
+   observaciones:[],liq:{etapas:{}},supervision:[],
+   docs:{mc:DOCS_TIPO.mc.map(s=>({sec:s.sec,items:s.items.map((n,i)=>({n,ok:i===0,link:''}))}))} ,
+   historial:[{a:'Proceso creado',q:'Robinson Zuñiga',f:'18 mar 2026 · 9:00am',n:''}]
+  },
+  {id:'CM-003-2026',tipo:'cm',objeto:'Consultoría Plan de Desarrollo Municipal Maicao',
+   contratista:'Servicios JR Consultores',nit:'890.234.567-3',valor:'$230.000.000',numContrato:'012-2026',
+   cdp:'2026-0145',crp:'2026-0098',rubro:'2.2.3 Consultoría',
+   supervisor:'J. Martínez',abogado:'María Pérez',dependencia:'Planeación',
+   linkSecop:'https://www.secop.gov.co',linkDrive:'',nota:'Proceso liquidado correctamente.',
+   estado:'Liquidado',fechaBase:'2025-09-01',editadas:{vencimiento:'2026-03-01'},condiciones:{},
+   observaciones:[],liq:{etapas:{sol_liq:true,informe_sup:true,paz_salvo:true,borrador_acta:true,firma_bilateral:true,publ_secop:true,archivo:true}},
+   supervision:[{periodo:'Ene 2026',fecha:'2026-01-31',estado:'recibido',observacion:'Entrega del informe final de consultoría.'}],
+   docs:{cm:DOCS_TIPO.cm.map(s=>({sec:s.sec,items:s.items.map(n=>({n,ok:true,link:''}))}))} ,
+   historial:[{a:'Proceso <strong>liquidado</strong>',q:'María Pérez',f:'10 mar 2026 · 4:00pm',n:''},{a:'Proceso creado',q:'María Pérez',f:'01 sep 2025 · 8:00am',n:''}]
+  }
+];
+
+let detId=null,wizStep=1,wizData={tipo:'lp',condiciones:{},editadas:{},fechaBase:''};
+let pendingCalField=null; // {procId, etapaId, isAuto, wizMode}
+
+// ══════════════════════════════════════
+// CALCULAR FECHAS con validación orden
+// ══════════════════════════════════════
+function calcF(tipo,base,edit,cond){
+  const et=CR[tipo].e.filter(e=>!e.f);
+  const F={};
+  if(!base) return F;
+  const bd=parse(base);
+  et.forEach(e=>{
+    if(e.t==='cond') return;
+    if(edit[e.id]){F[e.id]=parse(edit[e.id]);return;}
+    if(e.id==='pub'){F.pub=bd;return;}
+    if(e.b&&F[e.b]&&e.h>0) F[e.id]=addH(F[e.b],e.h);
+  });
+  et.forEach(e=>{
+    if(e.t==='cond'||e.h>=0) return;
+    if(edit[e.id]){F[e.id]=parse(edit[e.id]);return;}
+    if(e.b&&F[e.b]) F[e.id]=addH(F[e.b],e.h);
+  });
+  et.forEach(e=>{
+    if(e.t!=='cond'||!cond[e.cond]) return;
+    if(edit[e.id]){F[e.id]=parse(edit[e.id]);return;}
+    if(e.b&&F[e.b]) F[e.id]=addH(F[e.b],e.h===0?0:e.h);
+  });
+  return F;
+}
+
+function validarOrden(tipo,editadas,etapaId,nuevaFechaStr){
+  // Verificar que la nueva fecha sea >= fecha de la etapa previa
+  const et=CR[tipo].e.filter(e=>!e.f&&e.t!=='cond');
+  const idx=et.findIndex(e=>e.id===etapaId);
+  if(idx<=0) return null;
+  // buscar fecha anterior no nula
+  for(let i=idx-1;i>=0;i--){
+    const prev=et[i];
+    const prevFecha=editadas[prev.id]?parse(editadas[prev.id]):null;
+    if(prevFecha){
+      const nueva=parse(nuevaFechaStr);
+      if(nueva&&nueva<prevFecha){
+        return`La fecha de "${et[idx].n}" (${fmtD(nueva)}) no puede ser anterior a "${prev.n}" (${fmtD(prevFecha)}).`;
+      }
+      break;
+    }
+  }
+  return null;
+}
+
+// ══════════════════════════════════════
+// ALERTAS
+// ══════════════════════════════════════
+function getEstadoAlerta(f){
+  const d=diasRest(f);
+  if(d===null) return null;
+  if(d<=0) return{nivel:0,label:'HOY',cls:'t-red',dot:'d-red'};
+  if(d<=5) return{nivel:1,label:`${d}d`,cls:'t-orange',dot:'d-orange'};
+  if(d<=15) return{nivel:2,label:`${d}d`,cls:'t-yellow',dot:'d-amber'};
+  return{nivel:3,label:`${d}d`,cls:'',dot:'d-green'};
+}
+
+function getAllAlertas(){
+  const B=[[],[],[],[]];
+  PROCESOS.forEach(p=>{
+    const F=calcF(p.tipo,p.fechaBase,p.editadas,p.condiciones);
+    const et=CR[p.tipo].e.filter(e=>!e.f);
+    let added=new Set();
+    p.observaciones.filter(o=>!o.respondida).forEach(o=>{
+      const ea=getEstadoAlerta(o.vence);
+      if(!ea||ea.nivel===3) return;
+      const tL={proy_pliego:'proy.pliego',pliego_def:'pliego def.',eval:'inf.eval.'};
+      const acc={0:'Publicar respuesta en SECOP II HOY — incluir fundamento legal',1:`Publicar respuesta en SECOP II — quedan ${ea.label.replace('d','')} días hábiles`,2:`Preparar respuesta — vence pronto`};
+      B[ea.nivel].push({proc:p,label:`Obs. ${tL[o.tipo]||o.tipo}`,accion:acc[ea.nivel],fecha:o.vence,ea});
+      added.add('obs_'+o.tipo);
+    });
+    et.forEach(e=>{
+      const f=F[e.id];if(!f) return;
+      const ea=getEstadoAlerta(f);if(!ea||ea.nivel===3) return;
+      const labAcc={
+        cierre:'Verificar apertura de ofertas en SECOP II',
+        adjudicacion:'Realizar audiencia de adjudicación',
+        firma:'Gestionar firma del contrato y garantías',
+        traslado:'Publicar respuesta observaciones informe evaluación',
+        obs_pp:'Responder observaciones proyecto de pliego en SECOP II',
+        obs_pd:'Responder observaciones pliego definitivo en SECOP II',
+        informe:'Publicar informe de evaluación de ofertas en SECOP II',
+        riesgos:'Realizar audiencia de asignación de riesgos',
+      };
+      if(e.alertar){
+        const d=parseInt(ea.label);
+        const ac=ea.nivel===0?'⚠ Contrato vencido — iniciar liquidación bilateral inmediatamente':ea.nivel===1?`Contrato vence en ${ea.label} — verificar prórroga o adición`:`Contrato vence en ${ea.label} hábiles — tramitar prórroga si es necesario`;
+        B[ea.nivel].push({proc:p,label:'Vencimiento contrato',accion:ac,fecha:fmt(f),ea});
+      } else if(!added.has(e.id)){
+        B[ea.nivel].push({proc:p,label:e.n,accion:labAcc[e.id]||`Atender: ${e.n}`,fecha:fmt(f),ea});
+      }
+    });
+    if(!B.flat().some(a=>a.proc.id===p.id)) B[3].push({proc:p,label:'Al día',accion:'',fecha:'',ea:{nivel:3,dot:'d-green'}});
+  });
+  return B;
+}
+
+function alertaItemHtml(a){
+  const tag=a.ea.nivel<3?`<span class="al-tag ${a.ea.cls}">${a.ea.label}</span>`:'';
+  const ac=a.accion?`<div class="al-action" style="color:${['var(--red)','var(--orange)','var(--yellow)','var(--green)'][a.ea.nivel]}">→ ${a.accion}</div>`:'';
+  return`<div class="alert-item" onclick="openDet('${a.proc.id}')">
+    <div class="al-dot ${a.ea.dot}"></div>
+    <div class="al-body">
+      <div class="al-title">${a.proc.id} · ${a.proc.contratista}</div>
+      <div class="al-sub">${a.label}${a.fecha?' · '+fmtD(parse(a.fecha)):''}</div>
+      ${ac}
+    </div>${tag}</div>`;
+}
+
+// ══════════════════════════════════════
+// RENDER PÁGINAS
+// ══════════════════════════════════════
+function getEstColor(p){
+  const e=p.estado||'';
+  if(e.includes('ecución')) return 'p-green';
+  if(e.includes('Adjudic')) return 'p-blue';
+  if(e.includes('Observ')||e.includes('Evalua')) return 'p-amber';
+  if(e.includes('Liquid')) return 'p-purple';
+  return 'p-gray';
+}
+
+function renderDashboard(){
+  const B=getAllAlertas();
+  document.getElementById('st-hoy').textContent=B[0].length;
+  document.getElementById('st-5d').textContent=B[1].length;
+  document.getElementById('st-15d').textContent=B[2].length;
+  document.getElementById('st-aldia').textContent=B[3].length;
+  const tot=B[0].length+B[1].length;
+  document.getElementById('bell-n').textContent=tot;
+  document.getElementById('nav-n-alertas').textContent=tot;
+  document.getElementById('nav-n-proc').textContent=PROCESOS.length;
+  const urgAll=[...B[0],...B[1]].slice(0,5);
+  document.getElementById('dash-alertas').innerHTML=urgAll.length?urgAll.map(alertaItemHtml).join(''):'<div class="empty"><p>✓ Sin alertas urgentes</p></div>';
+  document.getElementById('dash-procesos').innerHTML=PROCESOS.slice(0,5).map(p=>`
+    <div class="proc-item" onclick="openDet('${p.id}')">
+      <div class="proc-id">${p.id}</div>
+      <div class="proc-info"><div class="proc-name">${p.objeto}</div><div class="proc-meta">${p.valor} · ${p.abogado}</div></div>
+      <span class="pill ${getEstColor(p)}">${p.estado}</span>
+    </div>`).join('');
+}
+
+function renderAlertasPage(){
+  const B=getAllAlertas();
+  const empty=m=>`<div class="empty"><p>${m}</p></div>`;
+  document.getElementById('al-hoy').innerHTML=B[0].length?B[0].map(alertaItemHtml).join(''):empty('Sin acciones urgentes hoy ✓');
+  document.getElementById('al-5d').innerHTML=B[1].length?B[1].map(alertaItemHtml).join(''):empty('Sin plazos críticos');
+  document.getElementById('al-15d').innerHTML=B[2].length?B[2].map(alertaItemHtml).join(''):empty('Sin vencimientos próximos');
+  document.getElementById('al-aldia').innerHTML=B[3].length?B[3].map(a=>`
+    <div class="proc-item" onclick="openDet('${a.proc.id}')">
+      <div class="proc-id">${a.proc.id}</div>
+      <div class="proc-info"><div class="proc-name">${a.proc.contratista}</div><div class="proc-meta">${CR[a.proc.tipo].n} · ${a.proc.abogado}</div></div>
+      <span class="pill p-green">Al día</span>
+    </div>`).join(''):empty('Sin procesos al día');
+}
+
+function renderProcesos(filtro=''){
+  const lista=PROCESOS.filter(p=>{
+    const q=(filtro||'').toLowerCase();
+    return !q||[p.id,p.contratista,p.objeto,p.abogado,p.dependencia].some(v=>v&&v.toLowerCase().includes(q));
+  });
+  document.getElementById('proc-sub').textContent=`${lista.length} de ${PROCESOS.length} procesos`;
+  const B=getAllAlertas();
+  document.getElementById('proc-list').innerHTML=lista.length?lista.map(p=>{
+    const al=B[0].find(a=>a.proc.id===p.id)||B[1].find(a=>a.proc.id===p.id);
+    const dEl=al?`<span style="font-family:var(--mono);font-size:10px;color:${al.ea.nivel===0?'var(--red)':'var(--orange)'};margin-right:6px;font-weight:600">${al.ea.nivel===0?'⚠ HOY':'⏱'+al.ea.label}</span>`:'';
+    return`<div class="proc-item" onclick="openDet('${p.id}')">
+      <div class="proc-id">${p.id}</div>
+      <div class="proc-info"><div class="proc-name">${p.objeto}</div><div class="proc-meta">${p.contratista} · ${p.valor} · <span style="color:var(--accent)">${p.abogado}</span></div></div>
+      ${dEl}
+      <span class="pill ${getEstColor(p)}">${p.estado}</span>
+    </div>`;
+  }).join(''):'<div class="empty"><p>No se encontraron procesos</p></div>';
+}
+
+// ══════════════════════════════════════
+// DETAIL PANEL — TABS FIXED (BUG 1 FIX)
+// ══════════════════════════════════════
+const DET_TABS=[
+  {id:'datos',label:'Datos'},
+  {id:'crono',label:'Cronograma'},
+  {id:'obs',label:'Observaciones'},
+  {id:'liq',label:'Liquidación'},
+  {id:'sup',label:'Supervisión'},
+  {id:'docs',label:'Documentos'},
+  {id:'hist',label:'Trazabilidad'},
+];
+
+function openDet(id){
+  const p=PROCESOS.find(x=>x.id===id);
+  if(!p) return;
+  detId=id;
+  document.getElementById('det-id-txt').textContent=`${p.id} · ${CR[p.tipo].n}`;
+  document.getElementById('det-title-txt').textContent=p.objeto;
+  document.getElementById('det-abogado-txt').textContent=`Abogado responsable: ${p.abogado}`;
+  document.getElementById('det-estado-badge').innerHTML=`<span class="pill ${getEstColor(p)}">${p.estado}</span>`;
+  document.getElementById('det-secop-btn').href=p.linkSecop||'#';
+  // Build tabs bar — SEPARATE from pane containers
+  document.getElementById('det-tabs-bar').innerHTML=DET_TABS.map((t,i)=>
+    `<button class="det-tab${i===0?' active':''}" onclick="detTabSwitch(this,'dp-${t.id}')">${t.label}</button>`
+  ).join('');
+  // Reset panes
+  document.querySelectorAll('.det-pane').forEach((p,i)=>p.classList.toggle('active',i===0));
+  // Render content
+  renderDDatos(p);renderDCrono(p);renderDObs(p);renderDLiq(p);renderDSup(p);renderDDocs(p);renderDHist(p);
+  document.getElementById('det-overlay').classList.add('open');
+}
+
+function closeDet(){document.getElementById('det-overlay').classList.remove('open');detId=null;}
+document.getElementById('det-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('det-overlay'))closeDet();});
+
+function detTabSwitch(el,paneId){
+  document.querySelectorAll('.det-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.det-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+
+// ── DATOS ──
+function renderDDatos(p){
+  const F=[
+    {l:'Contratista',k:'contratista'},{l:'NIT',k:'nit'},
+    {l:'Valor',k:'valor'},{l:'N° Contrato',k:'numContrato',hcls:p.numContrato?'hi-green':''},
+    {l:'CDP',k:'cdp'},{l:'CRP',k:'crp'},
+    {l:'Rubro',k:'rubro'},{l:'Supervisor',k:'supervisor'},
+    {l:'Abogado',k:'abogado'},{l:'Dependencia',k:'dependencia'},
+  ];
+  const noContrato=!p.numContrato?`<div class="ib ib-amber" style="margin:10px 0 0;font-size:11px">⚠ Sin número de contrato. Agrégalo cuando el proceso llegue a firma.</div>`:'';
+  // ESTADO MANUAL
+  const estadoOpts=(CR[p.tipo].estados||['Publicado','En ejecución','Adjudicado','Liquidado']).map(e=>
+    `<div class="estado-opt${p.estado===e?' sel':''}" onclick="cambiarEstado('${p.id}','${e}')">${e}</div>`
+  ).join('');
+  document.getElementById('dp-datos').innerHTML=`
+    <div class="field-grid">${F.map(f=>`
+      <div class="f-row">
+        <div class="f-lbl">${f.l}</div>
+        <div class="f-val ${f.hcls||''}" contenteditable="false" onclick="editF(this,'${p.id}','${f.k}')">${p[f.k]||'—'}</div>
+      </div>`).join('')}
+      <div class="f-row f-full">
+        <div class="f-lbl">Link SECOP</div>
+        <div class="f-val" contenteditable="false" onclick="editF(this,'${p.id}','linkSecop')">${p.linkSecop||'—'}</div>
+      </div>
+    </div>
+    ${noContrato}
+    <div style="margin:12px 0 0;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:7px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Estado del proceso</div>
+      <div class="estado-selector">${estadoOpts}</div>
+    </div>
+    <div style="margin:12px 0 0;padding:10px 13px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:7px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nota interna</div>
+      <div style="font-size:12px;color:${p.nota?'var(--text)':'var(--text3)'};cursor:pointer;padding:3px 5px;border-radius:4px;border:1px solid transparent;min-height:22px;line-height:1.5" onclick="editNota(this,'${p.id}')">${p.nota||'Agregar nota interna...'}</div>
+    </div>`;
+}
+
+function cambiarEstado(procId,nuevoEstado){
+  const p=PROCESOS.find(x=>x.id===procId);
+  if(!p||p.estado===nuevoEstado) return;
+  const old=p.estado;
+  p.estado=nuevoEstado;
+  p.historial.unshift({a:`Estado cambiado de <strong>${old}</strong> a <strong>${nuevoEstado}</strong>`,q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:''});
+  renderDDatos(p);renderDashboard();renderAlertasPage();renderProcesos();
+  document.getElementById('det-estado-badge').innerHTML=`<span class="pill ${getEstColor(p)}">${p.estado}</span>`;
+  toast(`✓ Estado actualizado: ${nuevoEstado}`);
+}
+
+function editF(el,procId,key){
+  if(el.getAttribute('contenteditable')==='true') return;
+  el.setAttribute('contenteditable','true');el.classList.add('editing');el.focus();
+  const orig=el.textContent;
+  const save=()=>{
+    el.removeAttribute('contenteditable');el.classList.remove('editing');
+    const p=PROCESOS.find(x=>x.id===procId);
+    if(p&&el.textContent!==orig&&el.textContent!=='—'){
+      const old=p[key];p[key]=el.textContent;
+      p.historial.unshift({a:`Campo <strong>${key}</strong> actualizado`,q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:`Anterior: ${old}`});
+      toast('✓ Guardado');renderDashboard();renderDDatos(p);
+    }
+    el.removeEventListener('blur',save);
+  };
+  el.addEventListener('blur',save);
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur();}if(e.key==='Escape'){el.textContent=orig;el.blur();}});
+}
+
+function editNota(el,procId){
+  el.setAttribute('contenteditable','true');el.style.borderColor='var(--accent)';el.focus();
+  const p=PROCESOS.find(x=>x.id===procId);
+  if(el.textContent==='Agregar nota interna...')el.textContent='';
+  el.onblur=()=>{el.removeAttribute('contenteditable');el.style.borderColor='transparent';if(p){p.nota=el.textContent;if(!el.textContent){el.textContent='Agregar nota interna...';el.style.color='var(--text3)';}else{el.style.color='var(--text)';}toast('✓ Nota guardada');}};
+}
+
+// ── CRONOGRAMA (BUG 2 + BUG 3 FIX) ──
+function renderDCrono(p){
+  const F=calcF(p.tipo,p.fechaBase,p.editadas,p.condiciones);
+  const et=CR[p.tipo].e;let num=0;
+  const rows=et.map(e=>{
+    if(e.f) return`<tr class="fase-sep"><td colspan="5"><span class="fase-label">${e.f}</span></td></tr>`;
+    num++;
+    const f=F[e.id];const edit=!!p.editadas[e.id];
+    const dias=f?diasRest(fmt(f)):null;
+    const isAutoLocked=(e.t==='auto'||e.id==='pub')&&!edit;
+    let cls='vacio',txt='—';
+    if(f){
+      txt=fmtD(f);
+      if(isAutoLocked) cls='auto-locked';
+      else if(dias!==null&&dias<=0) cls='vence-hoy';
+      else if(dias!==null&&dias<=5) cls='vence-5';
+      else if(dias!==null&&dias<=15) cls='vence-15';
+      else cls=edit?'':'variable';
+    } else if(e.t==='cond') txt='Condicional';
+    else if(e.t==='fijo'&&e.id!=='pub') txt='Ver contrato';
+    const lockIcon=isAutoLocked?`<span class="fecha-lock-icon" title="Calculado automáticamente por el Decreto 1082">🔒</span>`:'';
+    const diasHtml=dias!==null&&dias<=15?`<br><span style="font-family:var(--mono);font-size:9px;color:${dias<=0?'var(--red)':dias<=5?'var(--orange)':'var(--yellow)'}">${dias<=0?'VENCE HOY':dias+'d hábiles'}</span>`:'';
+    const tb=isAutoLocked?'<span class="pill p-green" style="font-size:9px">🔒 AUTO</span>':e.t==='var'?'<span class="pill p-amber" style="font-size:9px">VAR</span>':e.t==='cond'?'<span class="pill p-gray" style="font-size:9px">COND</span>':'';
+    const obs=e.obs?'<span class="pill p-red" style="font-size:9px;margin-left:3px">OBS</span>':'';
+    const restore=edit?`<span class="restore-btn" onclick="restoreF('${p.id}','${e.id}')" title="Restaurar cálculo automático">↺</span>`:'';
+    // BUG 2: fechas auto bloqueadas — solo se pueden forzar si el usuario hace doble click
+    const clickAction=isAutoLocked
+      ?`ondblclick="editFC('${p.id}','${e.id}','${f?fmt(f):''}',true)" title="Doble clic para forzar edición (plazo fijo del Decreto 1082)"`
+      :`onclick="editFC('${p.id}','${e.id}','${f?fmt(f):''}')"  title="Clic para editar"`;
+    return`<tr>
+      <td class="td-num">${num}</td>
+      <td class="td-name"><div class="td-name-main">${e.n}</div>${e.s?`<div class="td-name-sub">${e.s}</div>`:''}</td>
+      <td class="td-plazo">${e.p}</td>
+      <td class="td-fecha"><span class="fecha-btn ${cls}" id="fb-${p.id}-${e.id}" ${clickAction}>${txt}</span>${lockIcon}${restore}${diasHtml}</td>
+      <td class="td-tipo">${tb}${obs}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('dp-crono').innerHTML=`
+    <div class="ib ib-blue" style="margin-bottom:10px;font-size:11px">
+      🔒 Fechas con candado = calculadas por el Decreto 1082 (no editables). 
+      🟡 Fechas amarillas = la entidad define (editables). 
+      Doble clic en 🔒 para forzar edición si el SECOP II usa una fecha diferente.
+    </div>
+    <div class="crono-wrap"><table class="crono-table">
+      <thead><tr><th>#</th><th>Etapa</th><th>Plazo decreto</th><th>Fecha</th><th>Tipo</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <span class="pill p-green" style="font-size:9px">🔒 AUTO decreto</span>
+      <span class="pill p-amber" style="font-size:9px">VAR entidad define</span>
+      <span class="pill p-gray" style="font-size:9px">COND condicional</span>
+      <span class="pill p-red" style="font-size:9px">OBS observaciones</span>
+    </div>`;
+}
+
+// BUG 3: usa calendario custom sin festivos/fines de semana
+function editFC(procId,etapaId,curVal,forced=false){
+  const span=document.getElementById(`fb-${procId}-${etapaId}`);
+  if(!span) return;
+  if(forced){
+    toast('⚠ Editando fecha fija del Decreto 1082. Úsalo solo si el SECOP II tiene una fecha diferente.','amber');
+  }
+  // Obtener fecha mínima (etapa previa)
+  const p=PROCESOS.find(x=>x.id===procId);
+  if(!p) return;
+  const F=calcF(p.tipo,p.fechaBase,p.editadas,p.condiciones);
+  const et=CR[p.tipo].e.filter(e=>!e.f);
+  const idx=et.findIndex(e=>e.id===etapaId);
+  let minDate=null;
+  for(let i=idx-1;i>=0;i--){if(F[et[i].id]){minDate=fmt(F[et[i].id]);break;}}
+
+  openCal(function(ds){
+    if(!ds) return;
+    // Validar orden cronológico
+    const err=validarOrden(p.tipo,p.editadas,etapaId,ds);
+    if(err){toast('⚠ '+err,'amber');return;}
+    p.editadas[etapaId]=ds;
+    p.historial.unshift({a:`Fecha <strong>${etapaId}</strong> ${forced?'(forzada)':''} → ${fmtD(parse(ds))}`,q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:forced?'Fecha fija del decreto modificada manualmente':''});
+    renderDCrono(p);renderDashboard();toast('✓ Fecha actualizada');
+  },span,minDate);
+}
+
+function restoreF(procId,etapaId){
+  const p=PROCESOS.find(x=>x.id===procId);
+  if(!p) return;
+  delete p.editadas[etapaId];
+  renderDCrono(p);renderDashboard();toast('↺ Fecha restaurada al cálculo automático del Decreto 1082');
+}
+
+// ── OBSERVACIONES con contador en tiempo real ──
+function renderDObs(p){
+  const tipoL={proy_pliego:'Proy. pliego',pliego_def:'Pliego definitivo',eval:'Inf. evaluación'};
+  const tipoP={proy_pliego:10,pliego_def:5,eval:5};
+  const html=p.observaciones.map((o,i)=>{
+    const dias=diasRest(o.vence);
+    let cls='obs-card',cd='',cdCls='';
+    if(!o.respondida){
+      if(dias!==null&&dias<=0){cls='obs-card urgente';cd='⏱ VENCE HOY';cdCls='cd-red';}
+      else if(dias!==null&&dias<=5){cls='obs-card riesgo';cd=`⏱ ${dias}d hábiles para responder`;cdCls='cd-orange';}
+      else if(o.vence) cd=`Vence ${fmtD(parse(o.vence))} · ${diasRest(o.vence)}d hábiles`;
+    }
+    const respHtml=o.respondida&&o.respuestaTxt?`<div class="obs-respuesta"><div class="obs-respuesta-label">Respuesta registrada — ${o.respuestaFecha?fmtD(parse(o.respuestaFecha)):''}</div>${o.respuestaTxt}${o.fundamento?`<div style="font-family:var(--mono);font-size:10px;color:var(--green);margin-top:4px">📋 Fundamento: ${o.fundamento}</div>`:''}</div>`:'';
+    const btnR=!o.respondida?`<button class="btn btn-primary btn-xs" onclick="abrirRespObs('${p.id}',${i})">Registrar respuesta</button>`:`<span style="font-family:var(--mono);font-size:10px;color:var(--green)">✓ Respondida</span>`;
+    return`<div class="${cls} ${o.respondida?'':''}">
+      <div class="obs-header">
+        <span class="pill p-blue" style="font-size:10px">${tipoL[o.tipo]||o.tipo}</span>
+        <span style="font-size:10px;color:var(--text2);font-family:var(--mono)">Recibida: ${fmtD(parse(o.recibida))} · Plazo: ${tipoP[o.tipo]||5}d h.</span>
+        ${!o.respondida?`<span class="countdown ${cdCls}" style="margin-left:auto">${cd}</span>`:''}
+      </div>
+      <div class="obs-text">${o.texto}</div>
+      ${respHtml}
+      <div class="obs-footer">${btnR}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('dp-obs').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span class="ib ib-blue" style="flex:1;margin-right:10px;font-size:11px">La app calcula automáticamente el plazo de respuesta en días hábiles con festivos colombianos</span>
+      <button class="btn btn-primary btn-sm" onclick="addObsForm('${p.id}')">+ Registrar observación</button>
+    </div>
+    <div id="obs-form-wrap"></div>
+    ${html||'<div class="empty"><p>Sin observaciones registradas</p></div>'}`;
+}
+
+function addObsForm(procId){
+  document.getElementById('obs-form-wrap').innerHTML=`
+    <div class="obs-card" style="border-color:var(--accent);background:var(--accent-bg);margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px">Nueva observación</div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="form-group" style="margin:0">
+          <div class="form-label">Tipo</div>
+          <select class="form-input form-select" id="no-tipo" onchange="actualizarContadorObs()">
+            <option value="proy_pliego">Al proyecto de pliego (10d h.)</option>
+            <option value="pliego_def">Al pliego definitivo (5d h.)</option>
+            <option value="eval">Al informe de evaluación (5d h.)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <div class="form-label">Fecha recepción</div>
+          <button class="form-input" style="text-align:left;cursor:pointer;background:var(--white)" id="no-fecha-btn" onclick="abrirCalObs()">${fmtD(HOY)}</button>
+          <input type="hidden" id="no-fecha" value="${fmt(HOY)}">
+        </div>
+      </div>
+      <!-- CONTADOR EN TIEMPO REAL -->
+      <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px" id="obs-contador-wrap">
+        <span style="font-size:11px;color:var(--text2)">Vencimiento de la respuesta:</span>
+        <span id="obs-contador" class="dias-counter dc-ok">Calculando...</span>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Descripción de la observación</div>
+        <textarea class="form-input form-textarea" id="no-texto" placeholder="Describe la observación recibida..."></textarea>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn btn-primary btn-sm" onclick="guardarObs('${procId}')">Registrar observación</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('obs-form-wrap').innerHTML=''">Cancelar</button>
+      </div>
+    </div>`;
+  actualizarContadorObs();
+}
+
+function abrirCalObs(){
+  const btn=document.getElementById('no-fecha-btn');
+  openCal(function(ds){
+    document.getElementById('no-fecha').value=ds;
+    document.getElementById('no-fecha-btn').textContent=fmtD(parse(ds));
+    actualizarContadorObs();
+  },btn,null);
+}
+
+// CONTADOR EN TIEMPO REAL — BUG FIX
+function actualizarContadorObs(){
+  const tipo=document.getElementById('no-tipo')?.value;
+  const fecha=document.getElementById('no-fecha')?.value;
+  const el=document.getElementById('obs-contador');
+  if(!el||!tipo||!fecha) return;
+  const plazos={proy_pliego:10,pliego_def:5,eval:5};
+  const vence=addH(parse(fecha),plazos[tipo]||5);
+  const diasV=diasRest(fmt(vence));
+  let cls='dc-ok',txt='';
+  if(diasV===null){txt='Sin calcular';}
+  else if(diasV<=0){cls='dc-danger';txt=`VENCE HOY (${fmtD(vence)})`;}
+  else if(diasV<=5){cls='dc-warn';txt=`${diasV}d hábiles — vence ${fmtD(vence)}`;}
+  else{cls='dc-ok';txt=`${diasV}d hábiles — vence ${fmtD(vence)}`;}
+  el.className=`dias-counter ${cls}`;el.textContent=txt;
+}
+
+function guardarObs(procId){
+  const tipo=document.getElementById('no-tipo')?.value;
+  const fecha=document.getElementById('no-fecha')?.value;
+  const texto=document.getElementById('no-texto')?.value.trim();
+  if(!texto||!fecha){toast('⚠ Completa todos los campos','amber');return;}
+  const plazos={proy_pliego:10,pliego_def:5,eval:5};
+  const vence=addH(parse(fecha),plazos[tipo]||5);
+  const p=PROCESOS.find(x=>x.id===procId);if(!p) return;
+  p.observaciones.unshift({tipo,texto,recibida:fecha,vence:fmt(vence),respondida:false,respuestaTxt:'',fundamento:''});
+  p.historial.unshift({a:`Observación <strong>${tipo}</strong> registrada`,q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:texto.substring(0,60)});
+  renderDObs(p);renderDashboard();renderAlertasPage();
+  toast('✓ Observación registrada — alerta activada automáticamente');
+}
+
+function abrirRespObs(procId,idx){
+  const p=PROCESOS.find(x=>x.id===procId);if(!p) return;
+  const o=p.observaciones[idx];
+  const wraps=document.querySelectorAll('#dp-obs .obs-card');
+  const offset=document.getElementById('obs-form-wrap').innerHTML?1:0;
+  const card=wraps[idx+offset];
+  if(!card) return;
+  const footer=card.querySelector('.obs-footer');if(!footer) return;
+  footer.innerHTML=`<div style="width:100%">
+    <div class="form-group"><div class="form-label">Texto de la respuesta</div>
+      <textarea class="form-input form-textarea" id="r-txt-${idx}" placeholder="Describe la respuesta a la observación...">${o.respuestaTxt||''}</textarea>
+    </div>
+    <div class="form-group"><div class="form-label">Fundamento legal (norma aplicada)</div>
+      <input class="form-input" id="r-fund-${idx}" placeholder="Ej: Art. 2.2.1.1.2.2.1 Decreto 1082/2015" value="${o.fundamento||''}">
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px">
+      <button class="btn btn-success btn-xs" onclick="guardarResp('${procId}',${idx})">✓ Guardar respuesta</button>
+      <button class="btn btn-ghost btn-xs" onclick="renderDObs(PROCESOS.find(x=>x.id==='${procId}'))">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+function guardarResp(procId,idx){
+  const txt=document.getElementById(`r-txt-${idx}`)?.value.trim();
+  const fund=document.getElementById(`r-fund-${idx}`)?.value.trim();
+  if(!txt){toast('⚠ Escribe la respuesta','amber');return;}
+  const p=PROCESOS.find(x=>x.id===procId);if(!p) return;
+  p.observaciones[idx].respondida=true;
+  p.observaciones[idx].respuestaFecha=fmt(HOY);
+  p.observaciones[idx].respuestaTxt=txt;
+  p.observaciones[idx].fundamento=fund||'';
+  p.historial.unshift({a:'Observación <strong>respondida</strong>',q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:fund?`Fundamento: ${fund}`:''});
+  renderDObs(p);renderDashboard();renderAlertasPage();
+  toast('✓ Respuesta registrada con fundamento legal');
+}
+
+// ── LIQUIDACIÓN ──
+function renderDLiq(p){
+  const vence=p.editadas.vencimiento;
+  const diasV=vence?diasRest(vence):null;
+  const enLiq=diasV!==null&&diasV<=0;
+  const info=enLiq?'<div class="ib ib-red" style="margin-bottom:12px">⚠ El contrato venció. Tienes 4 meses para la liquidación bilateral (hasta '+fmtD(addH(parse(vence),120))+') y 2 meses adicionales para la unilateral.</div>'
+    :diasV!==null&&diasV<=15?`<div class="ib ib-amber" style="margin-bottom:12px">⚠ El contrato vence en ${diasV}d hábiles. Prepara la documentación de liquidación.</div>`
+    :'<div class="ib ib-blue" style="margin-bottom:12px">Las etapas de liquidación se activan cuando el contrato vence. El plazo bilateral es de 4 meses.</div>';
+  document.getElementById('dp-liq').innerHTML=info+LIQ_ETAPAS.map(e=>{
+    const done=(p.liq?.etapas||{})[e.id];
+    return`<div class="liq-step">
+      <div class="liq-dot ${done?'done':enLiq?'urgent':'pending'}"></div>
+      <div class="liq-body"><div class="liq-name">${e.n}</div>${e.p?`<div class="liq-meta">${e.p}</div>`:''}</div>
+      ${!done?`<button class="btn btn-ghost btn-xs" onclick="marcarLiq('${p.id}','${e.id}')">Marcar hecho</button>`:`<span style="font-family:var(--mono);font-size:10px;color:var(--green)">✓</span>`}
+    </div>`;
+  }).join('');
+}
+
+function marcarLiq(procId,etapaId){
+  const p=PROCESOS.find(x=>x.id===procId);if(!p) return;
+  if(!p.liq) p.liq={etapas:{}};
+  p.liq.etapas[etapaId]=true;
+  p.historial.unshift({a:`Etapa liquidación <strong>${etapaId}</strong> completada`,q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:''});
+  renderDLiq(p);toast('✓ Etapa marcada');
+}
+
+// ── SUPERVISIÓN ──
+function renderDSup(p){
+  const html=p.supervision.length?p.supervision.map(s=>`
+    <div class="sup-card">
+      <div class="sup-header">
+        <span style="font-family:var(--mono);font-size:11px;font-weight:500">${s.periodo}</span>
+        <span style="font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)">✓ Recibido</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:auto">${fmtD(parse(s.fecha))}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">${s.observacion}</div>
+    </div>`).join(''):'<div class="empty"><p>Sin informes de supervisión</p></div>';
+  document.getElementById('dp-sup').innerHTML=`
+    <div class="ib ib-blue" style="margin-bottom:12px;font-size:11px">El supervisor rinde informes periódicos de ejecución. Regístralos aquí para tramitar pagos y para el expediente.</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-size:12px;font-weight:600">Informes de supervisión</span>
+      <button class="btn btn-primary btn-sm" onclick="addSupForm('${p.id}')">+ Agregar informe</button>
+    </div>
+    <div id="sup-form-wrap-${p.id}"></div>${html}`;
+}
+
+function addSupForm(procId){
+  document.getElementById(`sup-form-wrap-${procId}`).innerHTML=`
+    <div class="sup-card" style="border-color:var(--accent);background:var(--accent-bg);margin-bottom:12px">
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="form-group" style="margin:0"><div class="form-label">Período</div><input class="form-input" id="sp-per" placeholder="Ej: Abr 2026"></div>
+        <div class="form-group" style="margin:0"><div class="form-label">Fecha recepción</div>
+          <button class="form-input" style="text-align:left;cursor:pointer" id="sp-fecha-btn" onclick="abrirCalSup('${procId}')">${fmtD(HOY)}</button>
+          <input type="hidden" id="sp-fecha" value="${fmt(HOY)}">
+        </div>
+      </div>
+      <div class="form-group"><div class="form-label">Observaciones del informe</div><textarea class="form-input form-textarea" id="sp-obs" placeholder="Resumen del informe..."></textarea></div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn btn-primary btn-sm" onclick="guardarSup('${procId}')">Guardar informe</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('sup-form-wrap-${procId}').innerHTML=''">Cancelar</button>
+      </div>
+    </div>`;
+}
+function abrirCalSup(procId){openCal(ds=>{document.getElementById('sp-fecha').value=ds;document.getElementById('sp-fecha-btn').textContent=fmtD(parse(ds));},document.getElementById('sp-fecha-btn'),null);}
+function guardarSup(procId){
+  const per=document.getElementById('sp-per')?.value.trim();
+  const fecha=document.getElementById('sp-fecha')?.value;
+  const obs=document.getElementById('sp-obs')?.value.trim();
+  if(!per||!obs){toast('⚠ Completa todos los campos','amber');return;}
+  const p=PROCESOS.find(x=>x.id===procId);if(!p) return;
+  p.supervision.push({periodo:per,fecha,estado:'recibido',observacion:obs});
+  p.historial.unshift({a:`Informe supervisión <strong>${per}</strong> registrado`,q:'Robinson Zuñiga',f:fmtD(HOY)+' · ahora',n:''});
+  renderDSup(p);toast('✓ Informe registrado');
+}
+
+// ── DOCUMENTOS ──
+function renderDDocs(p){
+  const k=Object.keys(p.docs)[0];
+  const secs=p.docs[k]||[];
+  document.getElementById('dp-docs').innerHTML=secs.map((sec,si)=>{
+    const done=sec.items.filter(i=>i.ok).length,total=sec.items.length;
+    const pct=Math.round(done/total*100);
+    return`<div class="check-sec">
+      <div class="check-sec-title">${sec.sec}<div class="check-bar"><div class="check-bar-fill" style="width:${pct}%"></div></div><span style="font-family:var(--mono);font-size:10px;color:${pct===100?'var(--green)':'var(--amber)'}">${done}/${total}</span></div>
+      ${sec.items.map((it,ii)=>`<div class="check-item">
+        <div class="check-box ${it.ok?'checked':''}" onclick="toggleDoc('${p.id}','${k}',${si},${ii})">${it.ok?'<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</div>
+        <div class="check-name" style="${!it.ok?'color:var(--text2)':''}">${it.n}</div>
+        ${it.link?`<a href="${it.link}" target="_blank" class="check-link">Drive ↗</a>`:`<span class="check-link" style="color:var(--text3)">—</span>`}
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function toggleDoc(procId,k,si,ii){const p=PROCESOS.find(x=>x.id===procId);if(!p)return;p.docs[k][si].items[ii].ok=!p.docs[k][si].items[ii].ok;renderDDocs(p);}
+
+// ── HISTORIAL + EXPORTAR PDF ──
+function renderDHist(p){
+  document.getElementById('dp-hist').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="font-size:12px;color:var(--text2)">Registro completo para entes de control</span>
+      <button class="btn btn-ghost btn-sm" onclick="exportarPDF('${p.id}')">📄 Exportar PDF</button>
+    </div>
+    ${p.historial.map((h,i)=>`<div class="hist-item">
+      <div class="hist-dot" style="background:${i===0?'var(--accent)':'var(--text3)'}"></div>
+      <div class="hist-body">
+        <div class="hist-action">${h.a}</div>
+        <div class="hist-meta">${h.q} · ${h.f}</div>
+        ${h.n?`<div class="hist-note">${h.n}</div>`:''}
+      </div>
+    </div>`).join('')}`;
+}
+
+// EXPORTAR PDF FUNCIONAL
+function exportarPDF(procId){
+  const p=PROCESOS.find(x=>x.id===procId);if(!p) return;
+  const F=calcF(p.tipo,p.fechaBase,p.editadas,p.condiciones);
+  const et=CR[p.tipo].e.filter(e=>!e.f);
+  const cronoRows=et.map(e=>{
+    const f=F[e.id];
+    return`<tr><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${e.n}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px;font-family:monospace">${f?fmtD(f):'—'}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:10px;color:#555">${e.p}</td></tr>`;
+  }).join('');
+  const histRows=p.historial.map(h=>`<tr><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${h.a.replace(/<[^>]*>/g,'')}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${h.q}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px;font-family:monospace">${h.f}</td></tr>`).join('');
+  const obsRows=p.observaciones.map(o=>`<tr><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${o.tipo}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${o.texto}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${o.respondida?'✓ Respondida':'Pendiente'}</td><td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${o.fundamento||'—'}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ContractTrack — ${p.id}</title>
+  <style>body{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:12px;color:#1c2033;margin:0;padding:24px}
+  h1{font-size:18px;margin-bottom:4px}h2{font-size:13px;color:#5c6280;font-weight:500;margin:0 0 16px}
+  h3{font-size:12px;color:#1a56db;margin:20px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px}
+  th{background:#f5f6fa;padding:6px 8px;border:1px solid #ddd;font-size:10px;text-align:left;text-transform:uppercase;letter-spacing:.04em;color:#9fa5bf}
+  .header{border-bottom:2px solid #1a56db;margin-bottom:20px;padding-bottom:12px}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+  .meta-item{background:#f5f6fa;padding:8px 12px;border-radius:6px;border-left:3px solid #1a56db}
+  .meta-label{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#9fa5bf;margin-bottom:2px}
+  .meta-val{font-size:12px;font-weight:500}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#9fa5bf;display:flex;justify-content:space-between}
+  @media print{body{padding:16px}}</style></head><body>
+  <div class="header">
+    <h1>ContractTrack OPS — Expediente Contractual</h1>
+    <h2>Gobernación de La Guajira · Área de Contratación</h2>
+    <p style="font-family:monospace;font-size:11px;color:#5c6280">Generado: ${fmtD(HOY)} · ${p.id}</p>
+  </div>
+  <div class="meta">
+    <div class="meta-item"><div class="meta-label">Proceso</div><div class="meta-val">${p.id} · ${CR[p.tipo].n}</div></div>
+    <div class="meta-item"><div class="meta-label">Estado</div><div class="meta-val">${p.estado}</div></div>
+    <div class="meta-item"><div class="meta-label">Contratista</div><div class="meta-val">${p.contratista}</div></div>
+    <div class="meta-item"><div class="meta-label">NIT</div><div class="meta-val">${p.nit||'—'}</div></div>
+    <div class="meta-item"><div class="meta-label">Valor</div><div class="meta-val">${p.valor}</div></div>
+    <div class="meta-item"><div class="meta-label">N° Contrato</div><div class="meta-val">${p.numContrato||'—'}</div></div>
+    <div class="meta-item"><div class="meta-label">Abogado responsable</div><div class="meta-val">${p.abogado}</div></div>
+    <div class="meta-item"><div class="meta-label">Supervisor</div><div class="meta-val">${p.supervisor||'—'}</div></div>
+  </div>
+  <h3>Objeto del contrato</h3>
+  <p style="margin-bottom:16px;line-height:1.6">${p.objeto}</p>
+  <h3>Cronograma de etapas</h3>
+  <table><thead><tr><th>Etapa</th><th>Fecha</th><th>Plazo</th></tr></thead><tbody>${cronoRows}</tbody></table>
+  ${p.observaciones.length?`<h3>Observaciones (${p.observaciones.length})</h3>
+  <table><thead><tr><th>Tipo</th><th>Observación</th><th>Estado</th><th>Fundamento legal</th></tr></thead><tbody>${obsRows}</tbody></table>`:''}
+  <h3>Historial de trazabilidad</h3>
+  <table><thead><tr><th>Acción</th><th>Profesional</th><th>Fecha y hora</th></tr></thead><tbody>${histRows}</tbody></table>
+  <div class="footer"><span>ContractTrack OPS v2.2 — Decreto 1082 de 2015</span><span>Gobernación de La Guajira</span></div>
+  </body></html>`;
+  const win=window.open('','_blank');
+  if(win){win.document.write(html);win.document.close();setTimeout(()=>win.print(),500);}
+  else toast('⚠ Activa pop-ups para exportar el PDF','amber');
+}
+
+// ══════════════════════════════════════
+// WIZARD
+// ══════════════════════════════════════
+const WSTEPS=[{l:'Tipo y objeto'},{l:'Partes y financiero'},{l:'Cronograma'},{l:'Documentos y notas'}];
+
+function openWizard(){wizStep=1;wizData={tipo:'lp',condiciones:{},editadas:{},fechaBase:'',modoImport:'secop',secopPaste:'',importCount:0,importadas:{}};document.getElementById('modal-wizard').classList.add('open');renderWiz();}
+function closeWizard(){document.getElementById('modal-wizard').classList.remove('open');}
+
+function renderWiz(){
+  document.getElementById('wiz-steps').innerHTML=WSTEPS.map((s,i)=>{
+    const n=i+1,cls=n===wizStep?'active':n<wizStep?'done':'';
+    return`${i>0?'<div class="wstep-line"></div>':''}<div class="wstep ${cls}"><div class="wcirc ${n===wizStep?'active':n<wizStep?'done':''}">${n<wizStep?'✓':n}</div><div class="wlabel">${s.l}</div></div>`;
+  }).join('');
+  document.getElementById('btn-prev').style.display=wizStep>1?'inline-flex':'none';
+  document.getElementById('btn-next').textContent=wizStep===4?'💾 Guardar proceso':'Siguiente →';
+  const B=document.getElementById('wiz-body');
+  if(wizStep===1){
+    const servidorConfig = localStorage.getItem('ct_server_url')||'';
+    const tieneServidor = servidorConfig.includes('script.google.com');
+    B.innerHTML=`<div class="wizard-body">
+      ${tieneServidor?`
+      <div style="background:var(--accent-bg);border:1.5px solid var(--accent-border);border-radius:8px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">⚡ Importar automáticamente del SECOP II</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6">Pega el link del proceso y la app jalará automáticamente el objeto, valor, tipo, contratista y todas las fechas del cronograma.</div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <div style="flex:1">
+            <div class="form-label">Link del proceso en el SECOP II</div>
+            <input class="form-input" id="w-secop-link" placeholder="https://community.secop.gov.co/Public/Tendering/..." value="${wizData.secopLink||''}">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="importarDesdeLink()" style="white-space:nowrap;flex-shrink:0">Importar →</button>
+        </div>
+        <div id="import-link-status" style="margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--text3)"></div>
+        ${wizData.importadoDesdeSecop?`<div class="ib ib-green" style="margin-top:8px;font-size:11px">✓ Datos importados del SECOP II — revisa y completa los campos que falten</div>`:''}
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text3);margin-bottom:12px">— o completa los datos manualmente —</div>
+      `:`
+      <div class="ib ib-blue" style="margin-bottom:14px;font-size:11px">💡 Configura el Apps Script en <strong>Configuración</strong> para importar procesos directamente del SECOP II con un link.</div>
+      `}
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">N° de proceso <span class="req">*</span></label><input class="form-input" id="w-id" placeholder="LP-006-2026" value="${wizData.id||''}"></div>
+        <div class="form-group"><label class="form-label">Tipo de proceso <span class="req">*</span></label><select class="form-input form-select" id="w-tipo" onchange="wizData.tipo=this.value;renderWizCond()">
+          ${Object.entries(CR).map(([k,v])=>`<option value="${k}" ${wizData.tipo===k?'selected':''}>${v.n}</option>`).join('')}
+        </select></div>
+      </div>
+      <div class="form-group"><label class="form-label">Objeto del contrato <span class="req">*</span></label><textarea class="form-input form-textarea" id="w-objeto" placeholder="Describe el objeto...">${wizData.objeto||''}</textarea></div>
+      <div class="form-group"><label class="form-label">Abogado responsable <span class="req">*</span></label><input class="form-input" id="w-abogado" placeholder="Nombre completo del abogado" value="${wizData.abogado||''}"></div>
+      <div class="section-divider">Etapas condicionales</div>
+      <div id="wiz-cond" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>`;
+    renderWizCond();
+  } else if(wizStep===2){
+    B.innerHTML=`<div class="wizard-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Contratista <span class="req">*</span></label><input class="form-input" id="w-cont" placeholder="Nombre o razón social" value="${wizData.contratista||''}"></div>
+        <div class="form-group"><label class="form-label">NIT / Cédula</label><input class="form-input" id="w-nit" placeholder="000.000.000-0" value="${wizData.nit||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Valor del contrato <span class="req">*</span></label><input class="form-input" id="w-valor" placeholder="$0" value="${wizData.valor||''}"></div>
+        <div class="form-group"><label class="form-label">N° Contrato</label><input class="form-input" id="w-numcont" placeholder="Se asigna al firmar" value="${wizData.numContrato||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">N° CDP</label><input class="form-input" id="w-cdp" value="${wizData.cdp||''}"></div>
+        <div class="form-group"><label class="form-label">N° CRP</label><input class="form-input" id="w-crp" value="${wizData.crp||''}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Rubro presupuestal</label><input class="form-input" id="w-rubro" value="${wizData.rubro||''}"></div>
+        <div class="form-group"><label class="form-label">Supervisor</label><input class="form-input" id="w-sup" value="${wizData.supervisor||''}"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Dependencia solicitante</label><input class="form-input" id="w-dep" placeholder="Ej: Infraestructura" value="${wizData.dependencia||''}"></div>
+    </div>`;
+  } else if(wizStep===3){
+    const modoSecop = wizData.modoImport !== 'manual';
+    const F=calcF(wizData.tipo,wizData.fechaBase,wizData.editadas,wizData.condiciones);
+    const et=CR[wizData.tipo].e; let num=0;
+    const rows=et.map(e=>{
+      if(e.f) return`<tr class="fase-sep"><td colspan="5"><span class="fase-label">${e.f}</span></td></tr>`;
+      num++;
+      const f=F[e.id]; const edit=!!wizData.editadas[e.id];
+      const isAutoLocked=(e.t==='auto'||e.id==='pub')&&!edit;
+      let cls='vacio',txt='—';
+      if(f){txt=fmtD(f);cls=isAutoLocked?'auto-locked':edit?'':'variable';}
+      else if(e.t==='cond') txt='Condicional';
+      const lockIcon=isAutoLocked?`<span class="fecha-lock-icon">🔒</span>`:'';
+      const tb=isAutoLocked?'<span class="pill p-green" style="font-size:9px">🔒 AUTO</span>':e.t==='var'?'<span class="pill p-amber" style="font-size:9px">VAR</span>':e.t==='cond'?'<span class="pill p-gray" style="font-size:9px">COND</span>':'';
+      const obs=e.obs?'<span class="pill p-red" style="font-size:9px;margin-left:3px">OBS</span>':'';
+      const restore=edit?`<span class="restore-btn" onclick="delete wizData.editadas['${e.id}'];renderWiz()">↺</span>`:'';
+      const clickAct=isAutoLocked
+        ?`ondblclick="editFW_cal('${e.id}','${f?fmt(f):''}')" title="Doble clic para forzar edición"`
+        :`onclick="editFW_cal('${e.id}','${f?fmt(f):''}')" title="Clic para editar"`;
+      // Indicador de importado del SECOP
+      const importBadge=wizData.importadas&&wizData.importadas[e.id]
+        ?'<span style="font-family:var(--mono);font-size:9px;color:var(--accent);margin-left:4px">← SECOP</span>':'';
+      return`<tr style="${wizData.importadas&&wizData.importadas[e.id]?'background:#eef3fd':''}}">
+        <td class="td-num">${num}</td>
+        <td class="td-name"><div class="td-name-main">${e.n}</div>${e.s?`<div class="td-name-sub">${e.s}</div>`:''}</td>
+        <td class="td-plazo">${e.p}</td>
+        <td class="td-fecha"><span class="fecha-btn ${cls}" id="wfb-${e.id}" ${clickAct}>${txt}</span>${lockIcon}${restore}${importBadge}</td>
+        <td class="td-tipo">${tb}${obs}</td></tr>`;
+    }).join('');
+
+    const resumenImport = wizData.importCount
+      ? `<div class="ib ib-green" style="margin-bottom:12px">✓ Se importaron <strong>${wizData.importCount} fechas</strong> del SECOP II. Las fechas en azul vienen directamente del cronograma oficial. Puedes editar cualquiera si es necesario.</div>`
+      : '';
+
+    B.innerHTML=`<div class="wizard-body">
+      <!-- MODO SELECTOR -->
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button onclick="wizData.modoImport='secop';renderWiz()" class="btn ${modoSecop?'btn-primary':'btn-ghost'}" style="flex:1;justify-content:center">
+          📋 Importar del SECOP II
+        </button>
+        <button onclick="wizData.modoImport='manual';renderWiz()" class="btn ${!modoSecop?'btn-primary':'btn-ghost'}" style="flex:1;justify-content:center">
+          ✏️ Ingresar fechas manualmente
+        </button>
+      </div>
+
+      ${modoSecop ? `
+      <!-- MODO SECOP II -->
+      <div class="ib ib-blue" style="margin-bottom:14px;font-size:11px;line-height:1.8">
+        <strong>Cómo importar el cronograma del SECOP II:</strong><br>
+        1. Abre el proceso en el SECOP II (perfil entidad o vista pública)<br>
+        2. Ve a la sección <strong>Cronograma</strong><br>
+        3. Selecciona todo el texto del cronograma (Ctrl+A en esa sección) y cópialo (Ctrl+C)<br>
+        4. Pégalo abajo (Ctrl+V) y haz clic en <strong>Importar fechas</strong>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pega aquí el cronograma del SECOP II <span class="req">*</span></label>
+        <textarea class="form-input" id="secop-paste" rows="8"
+          style="font-family:var(--mono);font-size:11px;resize:vertical"
+          placeholder="Pega aquí el texto del cronograma copiado del SECOP II...
+
+Ejemplo del formato esperado:
+Zona horaria   (UTC-05:00) Bogotá, Lima, Quito
+Publicación del Aviso (artículo 30 de la Ley 80 de 1993)   15/01/2026 6:00:00 PM ((UTC-05:00)...)
+Publicación del aviso de convocatoria pública   15/01/2026 6:00:00 PM
+Publicación de estudios previos   15/01/2026 6:00:00 PM
+Fecha de publicación del proyecto de pliego de condiciones   15/01/2026 6:21:52 PM
+Plazo para presentar observaciones al proyecto de Pliego de Condiciones   29/01/2026 6:00:00 PM
+Respuesta a las observaciones al Proyecto de Pliego   30/01/2026 5:00:00 PM
+Fecha prevista de publicación del pliego de condiciones definitivo   5/02/2026 6:00:00 PM
+Fecha de publicación del pliego de condiciones definitivo   5/02/2026 7:38:32 PM
+Expedición y publicación acto administrativo de apertura   5/02/2026 6:00:00 PM
+Audiencia de asignación de Riesgos   10/02/2026 10:00:00 AM
+Presentación de Observaciones a los Pliegos definitivos   10/02/2026 2:00:00 PM
+Respuesta a las observaciones al Pliego de Condiciones   10/02/2026 6:00:00 PM
+Plazo máximo para expedir adendas   10/02/2026 7:00:00 PM
+Presentación de Ofertas   16/02/2026 3:00:00 PM
+Apertura de Ofertas   16/02/2026 3:01:00 PM
+Publicación del informe de evaluación de las Ofertas   18/02/2026 10:00:00 AM
+Presentación de observaciones al informe de verificación o evaluación   27 días de tiempo transcurrido (25/02/2026 6:00:00 PM)
+Audiencia de Adjudicación   27 días de tiempo transcurrido (26/02/2026 10:00:00 AM)
+Publicación Acto Administrativo de adjudicación o de Declaratoria de Desierto   26 días de tiempo transcurrido (26/02/2026 6:00:00 PM)
+Firma del Contrato   26 días de tiempo transcurrido (26/02/2026 6:30:00 PM)
+Entrega de las garantías de ejecución del contrato   23 días de tiempo transcurrido (2/03/2026 12:00:00 PM)">${wizData.secopPaste||''}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+        <button class="btn btn-primary" onclick="importarCronogramaSecop()">📥 Importar fechas</button>
+        <button class="btn btn-ghost btn-sm" onclick="wizData.secopPaste='';wizData.importCount=0;wizData.importadas={};wizData.editadas={};wizData.fechaBase='';renderWiz()">Limpiar</button>
+        <span id="import-status" style="font-family:var(--mono);font-size:11px;color:var(--text3)"></span>
+      </div>
+      ` : `
+      <!-- MODO MANUAL -->
+      <div class="ib ib-amber" style="margin-bottom:14px">📅 Ingresa la fecha de publicación → el resto se calcula automáticamente con los plazos fijos del Decreto 1082. 🔒 = fijo · 🟡 = la entidad define.</div>
+      <div class="form-group" style="max-width:280px">
+        <label class="form-label">Fecha publicación aviso / proy. pliego <span class="req">*</span></label>
+        <button class="form-input" style="text-align:left;cursor:pointer" id="w-fecha-btn" onclick="abrirCalWiz()">${wizData.fechaBase?fmtD(parse(wizData.fechaBase)):'Seleccionar fecha →'}</button>
+        <input type="hidden" id="w-fecha" value="${wizData.fechaBase||''}">
+      </div>
+      `}
+
+      ${resumenImport}
+
+      <!-- TABLA CRONOGRAMA -->
+      ${wizData.fechaBase||wizData.importCount
+        ? `<div class="crono-wrap"><table class="crono-table">
+            <thead><tr><th>#</th><th>Etapa</th><th>Plazo decreto</th><th>Fecha</th><th>Tipo</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>`
+        : `<div class="empty" style="padding:20px"><p>Las fechas aparecerán aquí una vez importadas o ingresada la fecha base</p></div>`
+      }
+    </div>`;
+  } else if(wizStep===4){
+    B.innerHTML=`<div class="wizard-body">
+      <div class="form-group"><label class="form-label">Link SECOP II</label><input class="form-input" id="w-secop" placeholder="https://www.secop.gov.co/..." value="${wizData.linkSecop||''}"></div>
+      <div class="form-group"><label class="form-label">Carpeta Google Drive</label><input class="form-input" id="w-drive" placeholder="https://drive.google.com/..." value="${wizData.linkDrive||''}"></div>
+      <div class="form-group"><label class="form-label">Nota interna inicial</label><textarea class="form-input form-textarea" id="w-nota" placeholder="Observaciones relevantes...">${wizData.nota||''}</textarea></div>
+      <div class="ib ib-green">✓ El proceso se registrará con alertas automáticas. El abogado ${wizData.abogado||''} verá este proceso en su dashboard.</div>
+    </div>`;
+  }
+}
+
+function renderWizCond(){
+  const tipo=document.getElementById('w-tipo')?.value||wizData.tipo;
+  wizData.tipo=tipo;
+  const COND=[
+    {k:'mipymes',l:'¿Se limita la convocatoria a MIPYMES?',s:'Activa etapas de manifestación y aviso MIPYMES'},
+    {k:'visita',l:'¿Visita al sitio de la obra obligatoria?',s:'Solo para licitación de obra pública'},
+    {k:'sorteo',l:'¿Sorteo si hay más de 10 interesados?',s:'Solo para selección abreviada menor cuantía'},
+    {k:'docs_tipo',l:'¿Aplica Documentos Tipo CCE?',s:'Obligatorio para obras de infraestructura de transporte'},
+  ];
+  const rel=CR[tipo].e.filter(e=>e.t==='cond');
+  const el=document.getElementById('wiz-cond');if(!el) return;
+  const relevantes=COND.filter(c=>rel.some(e=>e.cond===c.k)||c.k==='docs_tipo');
+  el.innerHTML=relevantes.length?relevantes.map(c=>`<label class="form-check">
+    <input type="checkbox" ${wizData.condiciones[c.k]?'checked':''} onchange="wizData.condiciones['${c.k}']=this.checked">
+    <label style="cursor:pointer">${c.l}<span class="csub">${c.s}</span></label>
+  </label>`).join(''):'<span style="font-size:12px;color:var(--text3)">No hay etapas condicionales para este tipo de proceso.</span>';
+}
+
+// Wizard usa calendario custom
+function abrirCalWiz(){openCal(ds=>{wizData.fechaBase=ds;document.getElementById('w-fecha').value=ds;renderWiz();},document.getElementById('w-fecha-btn'),null);}
+function editFW_cal(id,cur){
+  const span=document.getElementById('wfb-'+id);if(!span) return;
+  openCal(ds=>{
+    if(ds){wizData.editadas[id]=ds;renderWiz();}
+  },span,null);
+}
+
+// ══════════════════════════════════════
+// PARSER CRONOGRAMA SECOP II
+// ══════════════════════════════════════
+
+// Mapa de etiquetas del SECOP II → IDs internos de ContractTrack
+const SECOP_MAP = [
+  // PUBLICACIÓN / INICIO
+  {keys:['publicación del aviso (artículo 30','publicacion del aviso (articulo 30','publicación del aviso de convocatoria','aviso de convocatoria pública','publicación de estudios previos','fecha de publicación del proyecto de pliego','publicacion del proyecto de pliego','proyecto de pliego de condiciones'],id:'pub'},
+  // OBS PROYECTO PLIEGO
+  {keys:['plazo para presentar observaciones al proyecto','observaciones al proyecto de pliego','observaciones al proyecto'],id:'obs_pp'},
+  // RESPUESTA OBS PROYECTO PLIEGO
+  {keys:['respuesta a las observaciones al proyecto de pliego','respuesta a las observaciones al proyecto','respuesta observaciones proyecto'],id:'resp_pp'},
+  // PLIEGO DEFINITIVO / APERTURA
+  {keys:['fecha de publicación del pliego de condiciones definitivo','publicación del pliego de condiciones definitivo','pliego de condiciones definitivo','expedición y publicación acto administrativo de apertura','acto de apertura','fecha prevista de publicación del pliego'],id:'apertura'},
+  // AUDIENCIA RIESGOS
+  {keys:['audiencia de asignación de riesgos','audiencia de riesgos','asignación de riesgos'],id:'riesgos'},
+  // OBS PLIEGO DEFINITIVO
+  {keys:['presentación de observaciones a los pliegos de condiciones definitivos','presentacion de observaciones a los pliegos','observaciones a los pliegos de condiciones definitivos','observaciones al pliego definitivo','observaciones pliegos'],id:'obs_pd'},
+  // RESPUESTA OBS PLIEGO DEFINITIVO
+  {keys:['respuesta a las observaciones al pliego de condiciones','respuesta a las observaciones al pliego','respuesta observaciones pliego definitivo','respuesta observaciones al pliego'],id:'resp_pd'},
+  // ADENDAS
+  {keys:['plazo máximo para expedir adendas','plazo maximo para expedir adendas','límite adendas','limite adendas','expedir adendas'],id:'adendas'},
+  // CIERRE / PRESENTACION OFERTAS
+  {keys:['presentación de ofertas','presentacion de ofertas','fecha de cierre','cierre del proceso','cierre'],id:'cierre'},
+  // APERTURA OFERTAS (misma fecha que cierre normalmente)
+  {keys:['apertura de ofertas'],id:'cierre'},
+  // INFORME EVALUACION
+  {keys:['publicación del informe de evaluación','publicacion del informe de evaluacion','informe de evaluación de las ofertas','publicación del informe'],id:'informe'},
+  // TRASLADO / OBS INFORME EVALUACION
+  {keys:['presentación de observaciones al informe de verificación','presentacion de observaciones al informe','observaciones al informe de evaluación','observaciones al informe de verificacion','traslado informe'],id:'traslado'},
+  // AUDIENCIA ADJUDICACION
+  {keys:['audiencia de adjudicación','audiencia de adjudicacion'],id:'adjudicacion'},
+  // ACTO ADJUDICACION / DECLARATORIA DESIERTO
+  {keys:['publicación acto administrativo de adjudicación','publicacion acto administrativo de adjudicacion','acto administrativo de adjudicación','acto de adjudicación','declaratoria de desierto'],id:'adjudicacion'},
+  // FIRMA CONTRATO
+  {keys:['firma del contrato'],id:'firma'},
+  // GARANTIAS / INICIO EJECUCION
+  {keys:['entrega de las garantías','entrega de las garantias','garantías de ejecución','inicio ejecución','inicio ejecucion','acta de inicio'],id:'ejecucion'},
+  // VENCIMIENTO / PLAZO CONTRATO
+  {keys:['vencimiento del contrato','fecha de vencimiento','plazo de ejecución','plazo de ejecucion'],id:'vencimiento'},
+  // MANIFESTACION INTERES (sel. abreviada)
+  {keys:['manifestación de interés','manifestacion de interes'],id:'manifestacion'},
+  // ACEPTACION OFERTA (concurso meritos)
+  {keys:['aceptación de oferta','aceptacion de oferta'],id:'aceptacion'},
+  // VISITA SITIO (obra publica)
+  {keys:['visita al sitio','visita de obra','visita técnica','visita tecnica'],id:'visita'},
+];
+
+function parsearFechaSecop(txt) {
+  if(!txt) return null;
+  // Formato: "15/01/2026 6:00:00 PM" o "5/02/2026 7:38:32 PM"
+  // También: "27 días de tiempo transcurrido (25/02/2026 6:00:00 PM(UTC-05:00)...)"
+  // Extraer fecha entre paréntesis si hay "días de tiempo transcurrido"
+  let fechaStr = txt;
+  const matchParen = txt.match(/\((\d{1,2}\/\d{1,2}\/\d{4})/);
+  if(matchParen) fechaStr = matchParen[1];
+  // Extraer DD/MM/YYYY
+  const matchFecha = fechaStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!matchFecha) return null;
+  const d = parseInt(matchFecha[1]);
+  const m = parseInt(matchFecha[2]) - 1;
+  const y = parseInt(matchFecha[3]);
+  return fmt(new Date(y, m, d));
+}
+
+function buscarEtapaSecop(linea) {
+  const lineaNorm = linea.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quitar tildes
+    .trim();
+  for(const entry of SECOP_MAP) {
+    for(const key of entry.keys) {
+      const keyNorm = key.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if(lineaNorm.includes(keyNorm)) return entry.id;
+    }
+  }
+  return null;
+}
+
+function importarCronogramaSecop() {
+  const texto = document.getElementById('secop-paste')?.value?.trim();
+  if(!texto) { toast('⚠ Pega el cronograma del SECOP II primero','amber'); return; }
+
+  wizData.secopPaste = texto;
+  wizData.editadas = {};
+  wizData.importadas = {};
+
+  // Dividir en líneas y limpiar
+  const lineas = texto.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+
+  let importadas = 0;
+  let fechaBaseCandidata = null;
+  const errores = [];
+
+  // El formato del SECOP II es:
+  // [Etiqueta de etapa] [TAB o espacios] [Fecha]
+  // o en líneas separadas: línea 1 = etiqueta, línea 2 = fecha
+  // Procesamos ambos formatos
+
+  for(let i=0; i<lineas.length; i++) {
+    const linea = lineas[i];
+
+    // Saltar líneas de zona horaria
+    if(linea.toLowerCase().includes('zona horaria') || linea.toLowerCase().includes('utc')) continue;
+
+    // Intentar detectar si la línea contiene TAB (formato columna)
+    const partes = linea.split(/\t+/);
+    let etiqueta = '', valorFecha = '';
+
+    if(partes.length >= 2) {
+      // Formato con tab: "Etiqueta   15/01/2026 6:00:00 PM"
+      etiqueta = partes[0].trim();
+      valorFecha = partes[partes.length-1].trim();
+    } else {
+      // Intentar detectar fecha en la misma línea después de espacios múltiples
+      const matchInline = linea.match(/^(.+?)\s{3,}(\d{1,2}\/\d{1,2}\/\d{4}.*)$/);
+      if(matchInline) {
+        etiqueta = matchInline[1].trim();
+        valorFecha = matchInline[2].trim();
+      } else {
+        // Ver si la línea siguiente tiene fecha
+        const siguienteFecha = i+1 < lineas.length ? lineas[i+1] : '';
+        const tienesFecha = /\d{1,2}\/\d{1,2}\/\d{4}/.test(linea) ||
+                           /\d+ días de tiempo/.test(linea);
+        const siguienteTieneFecha = /\d{1,2}\/\d{1,2}\/\d{4}/.test(siguienteFecha) ||
+                                    /\d+ días de tiempo/.test(siguienteFecha);
+        if(!tienesFecha && siguienteTieneFecha) {
+          etiqueta = linea;
+          valorFecha = siguienteFecha;
+          i++; // saltar la línea de fecha
+        } else if(tienesFecha) {
+          // La línea contiene la fecha al final
+          const mFecha = linea.match(/(\d{1,2}\/\d{1,2}\/\d{4}|\d+ días de tiempo.*)$/);
+          if(mFecha) {
+            etiqueta = linea.substring(0, linea.indexOf(mFecha[0])).trim();
+            valorFecha = mFecha[0];
+          }
+        } else {
+          continue;
+        }
+      }
+    }
+
+    if(!etiqueta || !valorFecha) continue;
+
+    // Parsear la fecha
+    const fechaStr = parsearFechaSecop(valorFecha);
+    if(!fechaStr) continue;
+
+    // Buscar a qué etapa corresponde
+    const etapaId = buscarEtapaSecop(etiqueta);
+    if(!etapaId) continue;
+
+    // Solo asignar si no fue asignada antes (primera ocurrencia gana)
+    if(!wizData.editadas[etapaId]) {
+      wizData.editadas[etapaId] = fechaStr;
+      wizData.importadas[etapaId] = true;
+      importadas++;
+
+      // La fecha de pub es la fecha base
+      if(etapaId === 'pub' && !fechaBaseCandidata) {
+        fechaBaseCandidata = fechaStr;
+      }
+    }
+  }
+
+  if(importadas === 0) {
+    toast('⚠ No se encontraron fechas válidas. Verifica que el texto sea del cronograma del SECOP II.','amber');
+    document.getElementById('import-status').textContent = '0 fechas encontradas';
+    return;
+  }
+
+  // Usar la fecha de pub como base, o la primera fecha encontrada
+  if(fechaBaseCandidata) {
+    wizData.fechaBase = fechaBaseCandidata;
+  } else {
+    // Tomar la fecha más temprana como base
+    const todasFechas = Object.values(wizData.editadas).filter(Boolean).sort();
+    if(todasFechas.length > 0) wizData.fechaBase = todasFechas[0];
+  }
+
+  wizData.importCount = importadas;
+
+  toast(`✓ Se importaron ${importadas} fechas del SECOP II`);
+  renderWiz();
+}
+
+function wizNext(){
+  if(wizStep===1){
+    const id=document.getElementById('w-id')?.value?.trim();
+    const obj=document.getElementById('w-objeto')?.value?.trim();
+    const abog=document.getElementById('w-abogado')?.value?.trim();
+    if(!id||!obj||!abog){toast('⚠ Completa los campos requeridos','amber');return;}
+    if(PROCESOS.find(p=>p.id===id)){toast('⚠ Ya existe un proceso con ese número','amber');return;}
+    wizData.id=id;wizData.objeto=obj;wizData.abogado=abog;
+    wizData.tipo=document.getElementById('w-tipo')?.value||wizData.tipo;
+  } else if(wizStep===2){
+    const c=document.getElementById('w-cont')?.value?.trim();
+    const v=document.getElementById('w-valor')?.value?.trim();
+    if(!c||!v){toast('⚠ Contratista y valor son requeridos','amber');return;}
+    wizData.contratista=c;wizData.valor=v;
+    wizData.nit=document.getElementById('w-nit')?.value||'';
+    wizData.numContrato=document.getElementById('w-numcont')?.value||'';
+    wizData.cdp=document.getElementById('w-cdp')?.value||'';
+    wizData.crp=document.getElementById('w-crp')?.value||'';
+    wizData.rubro=document.getElementById('w-rubro')?.value||'';
+    wizData.supervisor=document.getElementById('w-sup')?.value||'';
+    wizData.dependencia=document.getElementById('w-dep')?.value||'';
+  } else if(wizStep===3){
+    if(!wizData.fechaBase&&!wizData.importCount){toast('⚠ Importa el cronograma del SECOP II o selecciona la fecha de publicación','amber');return;}
+  } else if(wizStep===4){
+    wizData.linkSecop=document.getElementById('w-secop')?.value||'';
+    wizData.linkDrive=document.getElementById('w-drive')?.value||'';
+    wizData.nota=document.getElementById('w-nota')?.value||'';
+    guardarProceso();return;
+  }
+  wizStep++;renderWiz();
+}
+function wizPrev(){if(wizStep>1){
+  // BUG 5 FIX: guardar datos actuales antes de retroceder
+  if(wizStep===2){
+    wizData.contratista=document.getElementById('w-cont')?.value||wizData.contratista;
+    wizData.valor=document.getElementById('w-valor')?.value||wizData.valor;
+  }
+  wizStep--;renderWiz();
+}}
+
+function guardarProceso(){
+  const k=wizData.tipo;
+  const docsSecs=(DOCS_TIPO[k]||[]).map(s=>({sec:s.sec,items:s.items.map(n=>({n,ok:false,link:''}))}));
+  const p={
+    id:wizData.id,tipo:wizData.tipo,objeto:wizData.objeto,
+    contratista:wizData.contratista,nit:wizData.nit,valor:wizData.valor,
+    numContrato:wizData.numContrato||'',cdp:wizData.cdp,crp:wizData.crp,
+    rubro:wizData.rubro,supervisor:wizData.supervisor,abogado:wizData.abogado,
+    dependencia:wizData.dependencia,linkSecop:wizData.linkSecop,linkDrive:wizData.linkDrive,
+    nota:wizData.nota,estado:'Publicado',fechaBase:wizData.fechaBase,
+    editadas:{...wizData.editadas},condiciones:{...wizData.condiciones},
+    observaciones:[],liq:{etapas:{}},supervision:[],
+    docs:{[k]:docsSecs},
+    historial:[{a:'Proceso creado',q:wizData.abogado,f:fmtD(HOY)+' · ahora',n:''}]
+  };
+  PROCESOS.unshift(p);
+  closeWizard();renderDashboard();renderProcesos();renderAlertasPage();
+  document.getElementById('nav-n-proc').textContent=PROCESOS.length;
+  toast(`✓ Proceso ${p.id} registrado — alertas activadas`);
+  setTimeout(()=>openDet(p.id),400);
+}
+
+// ══════════════════════════════════════
+// LLAMADA AL APPS SCRIPT — via JSONP
+// (evita el error CORS del navegador)
+// ══════════════════════════════════════
+function llamarAppsScript(serverUrl, params){
+  return new Promise((resolve, reject) => {
+    const cbName = 'ct_cb_' + Date.now();
+    const timeout = setTimeout(()=>{
+      delete window[cbName];
+      const tag = document.getElementById(cbName);
+      if(tag) tag.remove();
+      reject(new Error('Tiempo de espera agotado — verifica la URL del Apps Script'));
+    }, 15000);
+
+    window[cbName] = function(data){
+      clearTimeout(timeout);
+      delete window[cbName];
+      const tag = document.getElementById(cbName);
+      if(tag) tag.remove();
+      resolve(data);
+    };
+
+    const qs = Object.entries({...params, callback: cbName})
+      .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+    const script = document.createElement('script');
+    script.id = cbName;
+    script.src = serverUrl + '?' + qs;
+    script.onerror = ()=>{
+      clearTimeout(timeout);
+      delete window[cbName];
+      script.remove();
+      reject(new Error('No se pudo conectar. Verifica que la URL sea correcta y que el Apps Script esté desplegado como Web App pública.'));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+// ══════════════════════════════════════
+// IMPORTAR DESDE LINK DEL SECOP II
+// ══════════════════════════════════════
+async function importarDesdeLink(){
+  const url = document.getElementById('w-secop-link')?.value?.trim();
+  if(!url){ toast('⚠ Pega el link del proceso del SECOP II','amber'); return; }
+  const serverUrl = localStorage.getItem('ct_server_url')||'';
+  if(!serverUrl){ toast('⚠ Configura primero la URL del Apps Script en Configuración','amber'); return; }
+
+  const statusEl = document.getElementById('import-link-status');
+  const btnEl = document.getElementById('btn-importar-link');
+  if(statusEl){ statusEl.textContent='⏳ Conectando con el SECOP II...'; statusEl.style.color='var(--text3)'; }
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='Importando...'; }
+
+  try {
+    const data = await llamarAppsScript(serverUrl, {accion:'importar', url});
+
+    if(!data.ok){
+      if(statusEl){ statusEl.textContent='⚠ '+data.error; statusEl.style.color='var(--red)'; }
+      toast('⚠ '+data.error,'amber');
+      return;
+    }
+
+    // ── Llenar datos del proceso ──
+    const p = data.proceso || {};
+    if(p.numeroProceso) wizData.id = p.numeroProceso;
+    if(p.objeto)        wizData.objeto = p.objeto;
+    if(p.tipoProcesoKey) wizData.tipo = p.tipoProcesoKey;
+    if(p.contratista)   wizData.contratista = p.contratista;
+    if(p.nit)           wizData.nit = p.nit;
+    if(p.valorEstimado) wizData.valor = p.valorEstimado;
+    wizData.linkSecop = url;
+    wizData.secopLink = url;
+    wizData.importadoDesdeSecop = true;
+
+    // ── Llenar cronograma ──
+    const crono = data.cronograma || [];
+    wizData.editadas = {}; wizData.importadas = {};
+    let totalImportadas = 0;
+    crono.forEach(etapa => {
+      if(etapa.id && etapa.fecha && !wizData.editadas[etapa.id]){
+        wizData.editadas[etapa.id] = etapa.fecha;
+        wizData.importadas[etapa.id] = true;
+        totalImportadas++;
+        if(etapa.id==='pub' && !wizData.fechaBase) wizData.fechaBase = etapa.fecha;
+      }
+    });
+    if(!wizData.fechaBase && Object.values(wizData.editadas).length > 0){
+      wizData.fechaBase = Object.values(wizData.editadas).filter(Boolean).sort()[0];
+    }
+    wizData.importCount = totalImportadas;
+
+    if(statusEl){ statusEl.textContent=`✓ ${totalImportadas} fechas importadas del cronograma`; statusEl.style.color='var(--green)'; }
+    toast(`✓ Proceso importado — ${totalImportadas} fechas del cronograma`);
+    renderWiz();
+
+  } catch(err){
+    if(statusEl){ statusEl.textContent='⚠ '+err.message; statusEl.style.color='var(--red)'; }
+    toast('⚠ '+err.message,'amber');
+  } finally {
+    if(btnEl){ btnEl.disabled=false; btnEl.textContent='Importar →'; }
+  }
+}
+
+// ══════════════════════════════════════
+// CONFIGURACIÓN — servidor Apps Script
+// ══════════════════════════════════════
+function guardarConfigServer(){
+  const url = document.getElementById('cfg-server-url')?.value?.trim()||'';
+  localStorage.setItem('ct_server_url', url);
+  actualizarEstadoConfig(url);
+}
+
+function actualizarEstadoConfig(url){
+  const dot  = document.getElementById('cfg-dot');
+  const pill = document.getElementById('cfg-pill');
+  if(!dot||!pill) return;
+  if(url && url.includes('script.google.com')){
+    dot.style.background='var(--amber)';
+    pill.className='pill p-amber';
+    pill.textContent='Configurado — sin verificar';
+  } else if(url){
+    dot.style.background='var(--red)';
+    pill.className='pill p-red';
+    pill.textContent='URL inválida';
+  } else {
+    dot.style.background='var(--text3)';
+    pill.className='pill p-gray';
+    pill.textContent='Sin configurar';
+  }
+}
+
+async function probarConexion(){
+  const url = document.getElementById('cfg-server-url')?.value?.trim()||'';
+  const statusEl = document.getElementById('cfg-status');
+  if(!url){ if(statusEl) statusEl.textContent='⚠ Ingresa la URL primero'; return; }
+  if(statusEl) statusEl.textContent='⏳ Probando conexión...';
+  try {
+    const res = await fetch(url+'?accion=ping');
+    const data = await res.json();
+    if(data.ok){
+      if(statusEl){ statusEl.textContent='✓ Conexión exitosa — '+data.mensaje; statusEl.style.color='var(--green)'; }
+      const dot=document.getElementById('cfg-dot'), pill=document.getElementById('cfg-pill');
+      if(dot) dot.style.background='var(--green)';
+      if(pill){ pill.className='pill p-green'; pill.textContent='Activo'; }
+      toast('✓ Apps Script conectado correctamente');
+    } else {
+      if(statusEl){ statusEl.textContent='⚠ '+data.error; statusEl.style.color='var(--red)'; }
+    }
+  } catch(err){
+    if(statusEl){ statusEl.textContent='⚠ Sin conexión: '+err.message; statusEl.style.color='var(--red)'; }
+    toast('⚠ No se pudo conectar con el Apps Script','amber');
+  }
+}
+
+function initConfig(){
+  const url = localStorage.getItem('ct_server_url')||'';
+  const el = document.getElementById('cfg-server-url');
+  if(el) el.value = url;
+  actualizarEstadoConfig(url);
+}
+
+// NAVEGACIÓN
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.getElementById('nav-'+name);if(nav) nav.classList.add('active');
+  if(name==='alertas') renderAlertasPage();
+  if(name==='procesos') renderProcesos();
+  if(name==='config') initConfig();
+}
+
+// TOAST
+function toast(msg,type='ok'){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast';
+  t.style.background=type==='amber'?'#92400e':'#1c2033';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+// INIT
+(function(){
+  const D=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  document.getElementById('tb-fecha').textContent=`${D[HOY.getDay()]} ${HOY.getDate()} ${MES[HOY.getMonth()]} ${HOY.getFullYear()}`;
+  document.getElementById('dash-greeting').textContent='Hola, Robinson 👋';
+  document.getElementById('dash-sub').textContent=`${HOY.getDate()} de ${MES[HOY.getMonth()]} ${HOY.getFullYear()} · ${PROCESOS.length} procesos registrados`;
+  renderDashboard();renderProcesos();
+})();
+</script>
+</body>
+</html>
